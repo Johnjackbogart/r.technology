@@ -11,7 +11,9 @@ function ThreeCanvas() {
     <Canvas
       gl={{ alpha: true }}
       onCreated={({ gl }) => {
-        gl.setClearColor(new THREE.Color(), 0.4);
+        gl.setClearColor(new THREE.Color(), 0.1);
+        //eslint-disable-next-line
+        gl.setTransparentSort((a, b) => a.z - b.z);
       }}
       eventPrefix="client"
       camera={{ position: [0, 0, 0], fov: 100 }}

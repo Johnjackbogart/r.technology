@@ -1,31 +1,47 @@
 "use client";
 import * as THREE from "three";
-import { useRef, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Physics, RigidBody } from "@react-three/rapier";
 import {
+  Mask,
+  useMask,
   Text,
-  Line,
+  Plane,
   DragControls,
   MeshTransmissionMaterial,
   Html,
 } from "@react-three/drei";
 
-function Scene() {
+function MaskedScene() {
+  const stencil = useMask(1);
+  const group = useRef<THREE.Group>();
+  const [hovered, hover] = useState(false);
   const tk = useRef<THREE.Mesh>(null);
 
   const p = 31;
   const q = 5;
+  //eslint-disable-next-line
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!tk.current) return;
     tk.current.rotation.z = 1 * state.clock.getElapsedTime();
-  });
 
+    if (!group.current) return;
+    group.current.rotation.y = state.clock.elapsedTime / 2;
+  });
   return (
-    <Physics gravity={[0, 0, 0]}>
-      <spotLight position={[0, 0, 0]} penumbra={10} castShadow angle={0.2} />
-      <Text position={[0, 0, -10]} color="green">
+    <group>
+      <mesh position={[0, 0, 1]}>
+        <planeGeometry args={[100, 100]} />
+        <meshBasicMaterial
+          color="#000000" // Plane color
+          transparent={true}
+          opacity={1}
+        />
+      </mesh>
+
+      <Text position={[0, 0, 2]} color="transparent">
         yoooo
         <Html
           style={{ color: "transparent", fontSize: "6em" }}
@@ -33,19 +49,14 @@ function Scene() {
         >
           yoooo
         </Html>
+        <meshStandardMaterial attach="material" opacity={0.1} />
       </Text>
-      <Line
-        points={[
-          [0, 0, 0],
-          [1, 1, 1],
-        ]}
-      />
       <ambientLight intensity={1} />
 
       <pointLight position={[0, 0, 0]} />
       <DragControls>
         <RigidBody colliders={"hull"} restitution={2}>
-          <mesh ref={tk}>
+          <mesh ref={tk} position={[0, 0, -10]}>
             <torusKnotGeometry args={[5, 0.5, 1000, 100, p, q]} />
             <MeshTransmissionMaterial
               thickness={2}
@@ -55,48 +66,32 @@ function Scene() {
           </mesh>
         </RigidBody>
       </DragControls>
-    </Physics>
+
+      <mesh position={[-0.75, 0, 0]} scale={1} ref={group}>
+        <torusKnotGeometry args={[0.6, 0.2, 128, 64]} />
+        <meshNormalMaterial {...stencil} />
+      </mesh>
+      <mesh
+        position={[0.75, 0, 0]}
+        onPointerOver={() => hover(true)}
+        onPointerOut={() => hover(false)}
+      >
+        <sphereGeometry args={[0.8, 64, 64]} />
+        <meshStandardMaterial
+          {...stencil}
+          color={hovered ? "orange" : "white"}
+        />
+      </mesh>
+    </group>
   );
 }
 
-function DeformablePlane() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const planeGeometry = useMemo(
-    () => new THREE.PlaneGeometry(10, 10, 100, 100),
-    [],
-  );
-
-  useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
-    if (!meshRef.current) return;
-    const positionAttribute = meshRef.current.geometry.attributes
-      .position as THREE.BufferAttribute;
-
-    for (let i = 0; i < positionAttribute.count; i++) {
-      const x = positionAttribute.getX(i);
-      const y = positionAttribute.getY(i);
-
-      // Example deformation function (wave effect)
-      const z = Math.sin(x * 2 + time) * Math.cos(y * 2 + time) * 0.5;
-
-      positionAttribute.setZ(i, z);
-    }
-
-    positionAttribute.needsUpdate = true; // Inform Three.js that the positions have changed
-
-    //meshRef.current.rotation.z = 0.01 * clock.getElapsedTime();
-    //meshRef.current.rotation.x = 0.01 * clock.getElapsedTime();
-  });
-
+function Scene() {
   return (
-    <mesh rotation={[0, 0, Math.PI / 2]} ref={meshRef} geometry={planeGeometry}>
-      <MeshTransmissionMaterial
-        thickness={0.1}
-        backside
-        backsideThickness={0.1}
-        transmission={0.99}
-      />
-    </mesh>
+    <Physics gravity={[0, 0, 0]}>
+      <MaskedScene />
+      <spotLight position={[0, 0, 0]} penumbra={10} castShadow angle={0.2} />
+    </Physics>
   );
 }
 
