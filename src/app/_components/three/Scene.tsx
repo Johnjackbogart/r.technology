@@ -4,24 +4,20 @@ import { useState, useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Physics, RigidBody } from "@react-three/rapier";
 import {
-  Mask,
   useMask,
   Text,
-  Plane,
   DragControls,
   MeshTransmissionMaterial,
   Html,
 } from "@react-three/drei";
 
 function MaskedScene() {
-  const stencil = useMask(1);
-  const group = useRef<THREE.Group>();
+  const group = useRef<THREE.Mesh>(null);
   const [hovered, hover] = useState(false);
   const tk = useRef<THREE.Mesh>(null);
 
   const p = 31;
   const q = 5;
-  //eslint-disable-next-line
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -69,7 +65,7 @@ function MaskedScene() {
 
       <mesh position={[-0.75, 0, 0]} scale={1} ref={group}>
         <torusKnotGeometry args={[0.6, 0.2, 128, 64]} />
-        <meshNormalMaterial {...stencil} />
+        <meshNormalMaterial />
       </mesh>
       <mesh
         position={[0.75, 0, 0]}
@@ -77,10 +73,7 @@ function MaskedScene() {
         onPointerOut={() => hover(false)}
       >
         <sphereGeometry args={[0.8, 64, 64]} />
-        <meshStandardMaterial
-          {...stencil}
-          color={hovered ? "orange" : "white"}
-        />
+        <meshStandardMaterial color={hovered ? "orange" : "white"} />
       </mesh>
     </group>
   );

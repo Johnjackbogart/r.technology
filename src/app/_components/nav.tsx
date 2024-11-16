@@ -12,7 +12,7 @@ import {
 import { Github } from "^/Github";
 
 export const Nav = () => {
-  const { theme, setTheme } = useTheme();
+  const { setTheme } = useTheme();
   return (
     <div
       className={
