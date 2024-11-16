@@ -8,7 +8,18 @@ import ThemeProvider from "&/theme";
 export const metadata: Metadata = {
   title: "Hi :)",
   description: "My Personal Website, welcome!",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    {
+      media: "(prefers-color-scheme: light)",
+      url: "/images/favicon-light.ico",
+      href: "/images/favicon-light.ico",
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      url: "/images/favicon-dark.ico",
+      href: "/images/favicon-dark.ico",
+    },
+  ],
 };
 
 export default function RootLayout({
