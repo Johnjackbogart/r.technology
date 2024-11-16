@@ -8,7 +8,18 @@ import ThemeProvider from "&/theme";
 export const metadata: Metadata = {
   title: "Hi :)",
   description: "My Personal Website, welcome!",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  icons: [
+    {
+      media: "(prefers-color-scheme: light)",
+      url: "/images/favicon-light.ico",
+      href: "/images/favicon-light.ico",
+    },
+    {
+      media: "(prefers-color-scheme: dark)",
+      url: "/images/favicon-dark.ico",
+      href: "/images/favicon-dark.ico",
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -17,10 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system">
-          <Nav />
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </ThemeProvider>
+        <div className="flex h-screen flex-col">
+          <ThemeProvider attribute="class" defaultTheme="system">
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
