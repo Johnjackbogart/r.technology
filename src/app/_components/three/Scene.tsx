@@ -1,12 +1,13 @@
 "use client";
 import * as THREE from "three";
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./Blob";
 
 function MaskedScene() {
   const tk = useRef<THREE.Mesh>(null);
+  const { viewport } = useThree();
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -30,8 +31,8 @@ function MaskedScene() {
 
       <Text
         position={[0, 0, 1.5]}
-        maxWidth={18}
-        fontSize={3}
+        maxWidth={viewport.width / 10}
+        fontSize={1}
         textAlign={"center"}
         lineHeight={0.75}
         font={"/fonts/geist_black.ttf"}
@@ -40,10 +41,10 @@ function MaskedScene() {
         <Html
           style={{
             color: "transparent",
-            fontSize: "6em",
-            width: "30rem",
+            fontSize: "3em",
+            width: "10rem",
             textAlign: "center",
-            lineHeight: ".75",
+            lineHeight: "1em",
           }}
           transform={true}
         >
