@@ -2,17 +2,10 @@
 import * as THREE from "three";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import {
-  Text,
-  Html,
-  MeshTransmissionMaterial,
-  useFont,
-} from "@react-three/drei";
+import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./Blob";
-import geist from "!/public/fonts/geist_black_regular.json";
 
 function MaskedScene() {
-  const font = useFont("/fonts/geist_black_regular.json");
   const tk = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {

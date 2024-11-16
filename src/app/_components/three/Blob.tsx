@@ -49,7 +49,8 @@ export default function Blob() {
     lastUpdateTime.current = currentTime;
 
     if (mesh.current) {
-      mesh.current.material.uniforms.uTime.value = currentTime;
+      (mesh.current.material as THREE.ShaderMaterial).uniforms.uTime!.value =
+        currentTime;
 
       // Apply momentum to mouse movement
       const lerpFactor = 1 - Math.pow(0.001, deltaTime);
@@ -68,7 +69,8 @@ export default function Blob() {
         mouseZ,
       ).normalize();
 
-      mesh.current.material.uniforms.uMouse.value = projectedMousePosition;
+      (mesh.current.material as THREE.ShaderMaterial).uniforms.uMouse!.value =
+        projectedMousePosition;
 
       // Apply rotation to the entire particle field
       mesh.current.rotation.y += deltaTime * 0.1;
@@ -180,7 +182,7 @@ export default function Blob() {
       
       // Create a more complex, undulating plane
       vec3 planeNormal = normalize(vec3(
-        sin(t * 0.23 + pos.x * 0.1) + cos(t * 0.13 + pos.y * 0.1),
+        sin(t * 0.23 + pos.x * 0.1) + cos(t * 0.3 + pos.y * 0.1),
         sin(t * 0.19 + pos.y * 0.1) + cos(t * 0.21 + pos.z * 0.1),
         sin(t * 0.17 + pos.z * 0.1) + cos(t * 0.15 + pos.x * 0.1)
       ));
@@ -188,8 +190,8 @@ export default function Blob() {
       float distanceToPlane = dot(pos, planeNormal);
       
       // Adjust the squeeze factor to create more pronounced squiggles
-      float squeezeFactor = exp(-distanceToPlane * distanceToPlane * 2.0);
-      float thinningFactor = -smoothstep(0.0, 1.0, squeezeFactor);
+      float squeezeFactor = exp(-distanceToPlane * distanceToPlane * 5.0);
+      float thinningFactor = -smoothstep(0.0, 5.0, squeezeFactor);
       
       vec3 displacementDir = normalize(pos - planeNormal * distanceToPlane);
       pos += displacementDir * squeezeFactor * morphFactor * 1.0;
@@ -201,7 +203,7 @@ export default function Blob() {
       pos += planeNormal * modulation * morphFactor * 0.75;
       
       // Add twisting effect
-      float twistFactor = sin(t * 0.5 + pos.y * 0.2) * 0.75;
+      float twistFactor = sin(t * 0.5 + pos.y * 0.2) * .75;
       pos.x += pos.y * twistFactor;
       pos.z += pos.y * twistFactor;
       

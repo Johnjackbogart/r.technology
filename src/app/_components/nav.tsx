@@ -10,16 +10,22 @@ import {
   DropdownMenuTrigger,
 } from "#/dropdown-menu";
 import { Github } from "^/Github";
+import R from "^/R";
+import { useThemeToFill } from "&/theme";
 
 export const Nav = () => {
   const { setTheme } = useTheme();
+  const theming = useThemeToFill();
   return (
     <div
       className={
-        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-card px-4 py-2"
+        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-card bg-transparent px-4 py-2"
       }
     >
       <div className={"mt-auto"}></div>
+      <div className={"h-full w-max overflow-visible"}>
+        <R theming={theming} />
+      </div>
       <div className={"ml-auto flex items-center gap-1"}>
         <Button
           onClick={() => {
@@ -40,8 +46,8 @@ export const Nav = () => {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Button variant="default" size="icon">
+              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 fill-black transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>

@@ -1,7 +1,6 @@
 "use client";
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
-import * as THREE from "three";
 import { Effects } from "./Effects";
 import { Loader } from "./Loader";
 import { Scene } from "./Scene";

@@ -28,10 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="system">
-          <Nav />
-          <TRPCReactProvider>{children}</TRPCReactProvider>
-        </ThemeProvider>
+        <div className="flex h-screen flex-col">
+          <ThemeProvider attribute="class" defaultTheme="system">
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
