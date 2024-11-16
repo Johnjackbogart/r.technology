@@ -29,6 +29,9 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
         <div className="flex h-screen flex-col">
+          <div className="absolute inset-0 z-10 flex w-full flex-col p-4 text-center">
+            <Nav />
+          </div>
           <ThemeProvider attribute="class" defaultTheme="system">
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </ThemeProvider>

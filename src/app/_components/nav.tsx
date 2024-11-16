@@ -19,11 +19,10 @@ export const Nav = () => {
   return (
     <div
       className={
-        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-card bg-transparent px-4 py-2"
+        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-card bg-transparent"
       }
     >
-      <div className={"mt-auto"}></div>
-      <div className={"h-full w-max overflow-visible"}>
+      <div className={"h-full w-max gap-1 overflow-visible"}>
         <R theming={theming} />
       </div>
       <div className={"ml-auto flex items-center gap-1"}>

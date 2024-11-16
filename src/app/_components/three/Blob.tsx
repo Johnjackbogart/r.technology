@@ -23,7 +23,7 @@ export default function Blob() {
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = 1000000;
+    const particleCount = 100000;
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {

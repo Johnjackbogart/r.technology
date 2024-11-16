@@ -1,3 +1,5 @@
+"use client";
+
 import type { SVGProps } from "react";
 import type { Theme } from "&/theme";
 
