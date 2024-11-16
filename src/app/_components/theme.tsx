@@ -57,7 +57,6 @@ export function useThemeToFill() {
   if (!mounted) return null;
   const isSystem = nextTheme === "system" ? true : false;
   const theme: Themes = nextTheme as Themes; //can return string | undefined, may  as well typecast
-  console.log(theme);
   const fills: Fills = {
     dark: {
       icon: "#ffffff",
