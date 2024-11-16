@@ -2,15 +2,9 @@
 
 import { useRef, RefObject } from "react";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
-import {
-  Bloom,
-  ChromaticAberration,
-  EffectComposer,
-  N8AO,
-  TiltShift2,
-} from "@react-three/postprocessing";
-import { ChromaticAberrationEffect, BlendFunction } from "postprocessing";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Bloom, EffectComposer, TiltShift2 } from "@react-three/postprocessing";
+import { ChromaticAberrationEffect } from "postprocessing";
 import { easing } from "maath";
 
 function Effects() {
@@ -23,11 +17,11 @@ function Effects() {
     easing.damp3(
       state.camera.position,
       [
-        Math.sin(-state.pointer.x) * 5,
-        state.pointer.y * 2,
-        0.5 + Math.cos(state.pointer.x) * 5,
+        Math.sin(0.01 * -state.pointer.x) * 5,
+        0.1 * state.pointer.y * 2,
+        0.5 + Math.cos(0.01 * state.pointer.x) * 5,
       ],
-      0.1,
+      0.05,
       delta,
     );
     state.camera.lookAt(0, 0, 0);
@@ -40,19 +34,7 @@ function Effects() {
   });
   return (
     <EffectComposer enableNormalPass={true}>
-      {/*
-      <ChromaticAberration
-        ref={
-          chromaRef as unknown as RefObject<typeof ChromaticAberrationEffect>
-        }
-        blendFunction={BlendFunction.NORMAL}
-        offset={new THREE.Vector2(0.01, 0.01)}
-        radialModulation={false}
-        modulationOffset={1.0}
-      />
-      */}
       <Bloom mipmapBlur luminanceThreshold={0.8} intensity={2} levels={8} />
-      <TiltShift2 blur={0.2} />
     </EffectComposer>
   );
 }
