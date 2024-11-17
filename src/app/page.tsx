@@ -10,7 +10,7 @@ export default async function Home() {
         <div className="absolute inset-0 z-10 flex w-full flex-col p-4 text-center">
           <Nav />
         </div>
-        <div className="w-full flex-grow">
+        <div className="flex w-full flex-grow">
           <Canvas />
         </div>
       </main>

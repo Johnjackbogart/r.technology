@@ -23,7 +23,7 @@ export default function Blob() {
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = 500000;
+    const particleCount = 100000;
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {
@@ -71,6 +71,10 @@ export default function Blob() {
 
       (mesh.current.material as THREE.ShaderMaterial).uniforms.uMouse!.value =
         projectedMousePosition;
+
+      console.log(
+        (mesh.current.material as THREE.ShaderMaterial).uniforms.uMouse!.value,
+      );
 
       // Apply rotation to the entire particle field
       mesh.current.rotation.y += deltaTime * 0.1;

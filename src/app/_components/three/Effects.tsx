@@ -34,7 +34,7 @@ function Effects() {
   });
   return (
     <EffectComposer enableNormalPass={true}>
-      <Bloom mipmapBlur luminanceThreshold={0.8} intensity={2} levels={8} />
+      <Bloom mipmapBlur luminanceThreshold={-0.8} intensity={-2} levels={8} />
     </EffectComposer>
   );
 }
