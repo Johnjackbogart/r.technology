@@ -1,13 +1,14 @@
 "use client";
 import * as THREE from "three";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./Blob";
 
 function MaskedScene() {
+  const [rerender, setRerender] = useState(false);
   const tk = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
+  const { viewport, gl } = useThree();
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -16,9 +17,30 @@ function MaskedScene() {
     if (!tk.current) return;
     tk.current.rotation.y = state.clock.elapsedTime / 2;
   });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setRerender(!rerender);
+    };
+    const handleMouseEnter = () => {
+      console.log("enter");
+      setRerender(!rerender);
+    };
+    const handleMouseLeave = () => {
+      console.log("leave");
+      setRerender(!rerender);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("mouseenter", handleMouseEnter);
+      window.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [rerender]);
   return (
     <group>
-      <Blob />
+      <Blob rerender={rerender} />
       <mesh position={[0, 0, 1]}>
         <planeGeometry args={[1000, 1000]} />
         <meshStandardMaterial
