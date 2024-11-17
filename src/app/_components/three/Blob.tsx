@@ -4,21 +4,18 @@ import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-export default function Blob() {
+export default function Blob({ rerender }: { rerender: boolean }) {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
   const lastUpdateTime = useRef(0);
   const { size } = useThree();
 
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uMouse: { value: new THREE.Vector3(0, 0, 1) },
-      uResolution: { value: new THREE.Vector2(size.width, size.height) },
-    }),
-    [size],
-  );
+  const uniforms = useRef({
+    uTime: { value: 0 },
+    uMouse: { value: new THREE.Vector3(0, 0, 1) },
+    uResolution: { value: new THREE.Vector2(size.width, size.height) },
+  });
 
   const [positions, colors] = useMemo(() => {
     const positions = [];
@@ -49,8 +46,7 @@ export default function Blob() {
     lastUpdateTime.current = currentTime;
 
     if (mesh.current) {
-      (mesh.current.material as THREE.ShaderMaterial).uniforms.uTime!.value =
-        currentTime;
+      uniforms.current.uTime.value = currentTime;
 
       // Apply momentum to mouse movement
       const lerpFactor = 1 - Math.pow(0.001, deltaTime);
@@ -68,18 +64,17 @@ export default function Blob() {
         Math.sin(mouseY),
         mouseZ,
       ).normalize();
-
-      (mesh.current.material as THREE.ShaderMaterial).uniforms.uMouse!.value =
-        projectedMousePosition;
-
-      console.log(
-        (mesh.current.material as THREE.ShaderMaterial).uniforms.uMouse!.value,
-      );
+      uniforms.current.uMouse.value = projectedMousePosition;
 
       // Apply rotation to the entire particle field
       mesh.current.rotation.y += deltaTime * 0.1;
     }
   });
+
+  // Update uResolution when the window size changes
+  useEffect(() => {
+    uniforms.current.uResolution.value.set(size.width, size.height);
+  }, [size]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -312,7 +307,7 @@ export default function Blob() {
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        uniforms={uniforms}
+        uniforms={uniforms.current}
         transparent
         depthWrite={false}
       />
