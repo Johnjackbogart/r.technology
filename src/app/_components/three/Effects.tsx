@@ -17,11 +17,11 @@ function Effects() {
     easing.damp3(
       state.camera.position,
       [
-        Math.sin(0.01 * -state.pointer.x) * 5,
-        0.1 * state.pointer.y * 2,
+        Math.sin(0.01 * -state.pointer.x) * 50,
+        1 * state.pointer.y * 2,
         0.5 + Math.cos(0.01 * state.pointer.x) * 5,
       ],
-      0.05,
+      0.5,
       delta,
     );
     state.camera.lookAt(0, 0, 0);

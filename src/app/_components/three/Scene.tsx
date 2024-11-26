@@ -1,6 +1,6 @@
 "use client";
 import * as THREE from "three";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./Blob";
@@ -8,6 +8,26 @@ import Blob from "./Blob";
 function MaskedScene() {
   const tk = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
+
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .custom-selection::selection {
+        background: rgba(.1, .1, .1, .1);
+        color: transparent;
+      }
+      .custom-selection::-moz-selection {
+        background: rgba(.1, .1, .1, .1);
+        color: transparent;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Cleanup the style tag on component unmount
+    return () => {
+      document.head.removeChild(style);
+    };
+  });
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -40,6 +60,7 @@ function MaskedScene() {
       >
         There has to be a better way
         <Html
+          className="custom-selection"
           style={{
             color: "transparent",
             fontSize: "3em",
