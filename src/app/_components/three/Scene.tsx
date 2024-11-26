@@ -40,15 +40,6 @@ function MaskedScene() {
   return (
     <group>
       <Blob />
-      <mesh position={[0, 0, 1]}>
-        <planeGeometry args={[1000, 1000]} />
-        <meshStandardMaterial
-          attach="material"
-          transparent
-          color={new THREE.Color().setHex(0x000000)}
-          opacity={0.1}
-        />
-      </mesh>
 
       <Text
         position={[0, 0, 1.5]}
