@@ -1,14 +1,13 @@
 "use client";
 import * as THREE from "three";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./Blob";
 
 function MaskedScene() {
-  const [rerender, setRerender] = useState(false);
   const tk = useRef<THREE.Mesh>(null);
-  const { viewport, gl } = useThree();
+  const { viewport } = useThree();
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -18,29 +17,9 @@ function MaskedScene() {
     tk.current.rotation.y = state.clock.elapsedTime / 2;
   });
 
-  useEffect(() => {
-    const handleResize = () => {
-      setRerender(!rerender);
-    };
-    const handleMouseEnter = () => {
-      console.log("enter");
-      setRerender(!rerender);
-    };
-    const handleMouseLeave = () => {
-      console.log("leave");
-      setRerender(!rerender);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("mouseenter", handleMouseEnter);
-      window.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, [rerender]);
   return (
     <group>
-      <Blob rerender={rerender} />
+      <Blob />
       <mesh position={[0, 0, 1]}>
         <planeGeometry args={[1000, 1000]} />
         <meshStandardMaterial
@@ -76,9 +55,9 @@ function MaskedScene() {
           background={new THREE.Color().setHex(0xffffff)}
         />
       </Text>
-      <ambientLight intensity={1} />
+      <ambientLight intensity={10} />
 
-      <pointLight position={[0, 0, 0]} />
+      <pointLight intensity={10} position={[0, 0, 0]} />
     </group>
   );
 }
@@ -87,7 +66,7 @@ function Scene() {
   return (
     <>
       <MaskedScene />
-      <spotLight position={[0, 0, 0]} penumbra={10} castShadow angle={0.2} />
+      <spotLight position={[0, 0, 0]} penumbra={1} castShadow angle={0.2} />
     </>
   );
 }

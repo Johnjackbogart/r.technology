@@ -2,9 +2,16 @@
 
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import {
+  Bloom,
+  SelectiveBloom,
+  Selection,
+  EffectComposer,
+  TiltShift2,
+} from "@react-three/postprocessing";
 import * as THREE from "three";
 
-export default function Blob({ rerender }: { rerender: boolean }) {
+export default function Blob() {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
