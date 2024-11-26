@@ -3,13 +3,13 @@
 import { useRef, RefObject } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer, TiltShift2 } from "@react-three/postprocessing";
-import { ChromaticAberrationEffect } from "postprocessing";
+import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { easing } from "maath";
+import { useThemeToFill } from "&/theme";
 
 function Effects() {
-  const chromaRef = useRef<ChromaticAberrationEffect>(null);
-  let offset = new THREE.Vector2(0.1, 0.1);
+  const theming = useThemeToFill();
+  const dark = theming?.theme === "dark" ? true : false;
 
   useFrame((state, delta) => {
     //can I just import this as a prop ?????
@@ -17,24 +17,23 @@ function Effects() {
     easing.damp3(
       state.camera.position,
       [
-        Math.sin(0.01 * -state.pointer.x) * 5,
-        0.1 * state.pointer.y * 2,
+        Math.sin(0.01 * -state.pointer.x) * 50,
+        1 * state.pointer.y * 2,
         0.5 + Math.cos(0.01 * state.pointer.x) * 5,
       ],
-      0.05,
+      0.5,
       delta,
     );
     state.camera.lookAt(0, 0, 0);
-
-    if (!chromaRef.current) return;
-    const x = Math.sin(-state.pointer.x) / 10;
-    const y = state.pointer.y / 10;
-    offset = new THREE.Vector2(x, y);
-    chromaRef.current.offset = offset;
   });
   return (
     <EffectComposer enableNormalPass={true}>
-      <Bloom mipmapBlur luminanceThreshold={-0.8} intensity={-2} levels={8} />
+      <Bloom
+        mipmapBlur
+        luminanceThreshold={0}
+        intensity={dark ? 0.1 : -8}
+        levels={8}
+      />
     </EffectComposer>
   );
 }

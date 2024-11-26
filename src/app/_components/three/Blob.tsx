@@ -2,9 +2,16 @@
 
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
+import {
+  Bloom,
+  SelectiveBloom,
+  Selection,
+  EffectComposer,
+  TiltShift2,
+} from "@react-three/postprocessing";
 import * as THREE from "three";
 
-export default function Blob({ rerender }: { rerender: boolean }) {
+export default function Blob() {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
@@ -56,15 +63,18 @@ export default function Blob({ rerender }: { rerender: boolean }) {
         (targetMousePosition.current.y - mousePosition.current.y) * lerpFactor;
 
       // Project mouse position onto a sphere
-      const mouseX = mousePosition.current.x * Math.PI;
-      const mouseY = (mousePosition.current.y * Math.PI) / 2;
-      const mouseZ = Math.cos(mouseY) * Math.cos(mouseX);
-      const projectedMousePosition = new THREE.Vector3(
-        Math.cos(mouseY) * Math.sin(mouseX),
-        Math.sin(mouseY),
-        mouseZ,
-      ).normalize();
-      uniforms.current.uMouse.value = projectedMousePosition;
+      console.log(currentTime);
+      if (currentTime > 5) {
+        const mouseX = mousePosition.current.x * Math.PI;
+        const mouseY = (mousePosition.current.y * Math.PI) / 2;
+        const mouseZ = Math.cos(mouseY) * Math.cos(mouseX);
+        const projectedMousePosition = new THREE.Vector3(
+          Math.cos(mouseY) * Math.sin(mouseX),
+          Math.sin(mouseY),
+          mouseZ,
+        ).normalize();
+        uniforms.current.uMouse.value = projectedMousePosition;
+      }
 
       // Apply rotation to the entire particle field
       mesh.current.rotation.y += deltaTime * 0.1;
@@ -222,12 +232,10 @@ export default function Blob({ rerender }: { rerender: boolean }) {
       vec3 color1 = vec3(1.0, 0.2, 0.2); // Red
       vec3 color2 = vec3(0.2, 1.0, 0.2); // Green
       vec3 color3 = vec3(0.2, 0.2, 1.0); // Blue
-      vec3 color4 = vec3(1.0, 1.0, 0.2); // Yellow
       vec3 color5 = vec3(0.0, 0.0, 0.0); // Magenta
 
       vec3 finalColor = mix(color1, color2, n1);
       finalColor = mix(finalColor, color3, n2);
-      finalColor = mix(finalColor, color4, n3);
       finalColor = mix(finalColor, color5, snoise(pos * 0.2 + t * 0.1) * 0.5 + 0.5);
 
       return finalColor;
@@ -255,8 +263,8 @@ export default function Blob({ rerender }: { rerender: boolean }) {
       float interactionRadius = 0.8; // Adjust this value to change the size of the affected area
       float dotProduct = dot(normalize(pos), uMouse);
 
-      if (dotProduct > cos(interactionRadius)) {
-        float mouseEffect = smoothstep(cos(interactionRadius), 1.0, dotProduct) * 5.0;
+      if (dotProduct > cos(interactionRadius) && uTime > 5.0) {
+        float mouseEffect = smoothstep(cos(interactionRadius), 1.0, dotProduct) * 2.5;
         float mouseDisplacement = sin(dotProduct * 10.0 - uTime * 5.0) * mouseEffect;
         pos += uMouse * mouseDisplacement * 0.5;
       }

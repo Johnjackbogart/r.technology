@@ -12,6 +12,7 @@ import {
 import { Github } from "^/Github";
 import R from "^/R";
 import { useThemeToFill } from "&/theme";
+import pkg from "!/package.json";
 
 export const Nav = () => {
   const { setTheme } = useTheme();
@@ -19,7 +20,7 @@ export const Nav = () => {
   return (
     <div
       className={
-        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-card bg-transparent"
+        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-transparent"
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
@@ -28,13 +29,7 @@ export const Nav = () => {
       <div className={"ml-auto flex items-center gap-1"}>
         <Button
           onClick={() => {
-            window.open(
-              //https://stackoverflow.com/questions/50822310/how-to-import-package-json-in-typescript
-              //I don't think this will break anything on vercel??
-              process.env.npm_package_homepage,
-              "_blank",
-              "noopener noreferrer",
-            );
+            window.open(pkg.homepage, "_blank", "noopener noreferrer");
           }}
           variant={"ghost"}
           className={"ml-auto flex items-center gap-1.5"}
