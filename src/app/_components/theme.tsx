@@ -46,7 +46,7 @@ export type Theme = ThemeFill | undefined | null;
 
 export function useThemeToFill() {
   //theme may be undefined, so need to properly handle both here. The decision is to set the icon to be invisible
-  const { theme: nextTheme } = useTheme();
+  const { resolvedTheme: nextTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

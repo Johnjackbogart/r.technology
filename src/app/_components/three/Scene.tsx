@@ -40,15 +40,6 @@ function MaskedScene() {
   return (
     <group>
       <Blob />
-      <mesh position={[0, 0, 1]}>
-        <planeGeometry args={[1000, 1000]} />
-        <meshStandardMaterial
-          attach="material"
-          transparent
-          color={new THREE.Color().setHex(0x000000)}
-          opacity={0.1}
-        />
-      </mesh>
 
       <Text
         position={[0, 0, 1.5]}
@@ -58,7 +49,7 @@ function MaskedScene() {
         lineHeight={0.75}
         font={"/fonts/geist_black.ttf"}
       >
-        There has to be a better way
+        There has to be a kinder way
         <Html
           className="custom-selection"
           style={{
@@ -70,7 +61,7 @@ function MaskedScene() {
           }}
           transform={true}
         >
-          There has to be a better way
+          There has to be a kinder way
         </Html>
         <MeshTransmissionMaterial
           background={new THREE.Color().setHex(0xffffff)}

@@ -2,13 +2,6 @@
 
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import {
-  Bloom,
-  SelectiveBloom,
-  Selection,
-  EffectComposer,
-  TiltShift2,
-} from "@react-three/postprocessing";
 import * as THREE from "three";
 
 export default function Blob() {
@@ -230,13 +223,13 @@ export default function Blob() {
       float n3 = snoise(vec3(pos.z * scale, pos.x * scale, t * speed + 200.0)) * 0.5 + 0.5;
 
       vec3 color1 = vec3(1.0, 0.2, 0.2); // Red
-      vec3 color2 = vec3(0.2, 1.0, 0.2); // Green
+      vec3 color2 = vec3(0.5, 0.0, 0.5); // Purple
       vec3 color3 = vec3(0.2, 0.2, 1.0); // Blue
-      vec3 color5 = vec3(0.0, 0.0, 0.0); // Magenta
+      vec3 color5 = vec3(0.0, 0.0, 0.0); // Black
 
       vec3 finalColor = mix(color1, color2, n1);
       finalColor = mix(finalColor, color3, n2);
-      finalColor = mix(finalColor, color5, snoise(pos * 0.2 + t * 0.1) * 0.5 + 0.5);
+      finalColor = mix(finalColor, color5, snoise(pos * 0.2 + t * 0.1) * 0.1 + 0.5);
 
       return finalColor;
     }
