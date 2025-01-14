@@ -49,7 +49,7 @@ function MaskedScene() {
         lineHeight={0.75}
         font={"/fonts/geist_black.ttf"}
       >
-        There has to be a kinder way
+        There has to be a healthier way
         <Html
           className="custom-selection"
           style={{
@@ -61,7 +61,7 @@ function MaskedScene() {
           }}
           transform={true}
         >
-          There has to be a kinder way
+          There has to be a healthier way
         </Html>
         <MeshTransmissionMaterial
           background={new THREE.Color().setHex(0xffffff)}

@@ -73,7 +73,6 @@ export function useThemeToFill() {
     light: "#ffffff",
     system: "transparent",
   };
-  console.log(JSON.stringify(fills[theme]));
   const theming: Theme = {
     theme: theme,
     isSystem: isSystem,
