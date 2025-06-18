@@ -7,7 +7,7 @@ import ThemeProvider from "&/theme";
 
 export const metadata: Metadata = {
   title: "Hi :)",
-  description: "My Personal Website, welcome!",
+  description: "r.tech",
   icons: [
     {
       media: "(prefers-color-scheme: light)",
