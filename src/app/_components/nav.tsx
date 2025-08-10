@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import Link from "next/link";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "#/button";
@@ -27,6 +28,17 @@ export const Nav = () => {
         <R theming={theming} />
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
+        <div className="flex basis-2 gap-2 text-lg text-black dark:text-white">
+          <div className={""}>
+            <Link href="#team">Team</Link>
+          </div>
+          <div className={""}>
+            <Link href="#thesis">Thesis</Link>
+          </div>
+          <div className={""}>
+            <Link href="#portfolio">Portolio</Link>
+          </div>
+        </div>
         <Button
           onClick={() => {
             window.open(pkg.homepage, "_blank", "noopener noreferrer");
@@ -35,7 +47,7 @@ export const Nav = () => {
           className={"ml-auto flex items-center gap-1.5"}
         >
           <span>
-            <Github className={"size-4"} />
+            <Github className={"size-4 text-black dark:text-white"} />
           </span>
         </Button>
         <DropdownMenu>
