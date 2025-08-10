@@ -28,7 +28,7 @@ export const Nav = () => {
         <R theming={theming} />
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
-        <div className="flex basis-2 gap-2 text-lg text-black dark:text-white">
+        <div className="flex basis-2 gap-3 text-lg text-black dark:text-white">
           <div className={""}>
             <Link href="#team">Team</Link>
           </div>
