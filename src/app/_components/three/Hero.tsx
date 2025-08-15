@@ -39,7 +39,7 @@ function MaskedScene() {
 
   return (
     <group>
-      <Blob />
+      <Blob points={100000} />
 
       <Text
         position={[0, 0, 1.5]}
