@@ -3,6 +3,7 @@ import * as React from "react";
 import Link from "next/link";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import clsx from "clsx";
 import { Button } from "#/button";
 import {
   DropdownMenu,
@@ -14,10 +15,21 @@ import { Github } from "^/Github";
 import R from "^/R";
 import { useThemeToFill } from "&/theme";
 import pkg from "!/package.json";
+import { useHashPage } from "@/lib/useHashPage";
 
 export const Nav = () => {
   const { setTheme } = useTheme();
   const theming = useThemeToFill();
+  const current = useHashPage("Hero");
+
+  const linkClass = (name: string) =>
+    clsx(
+      "transition-colors",
+      current.toLowerCase() === name
+        ? "font-semibold !underline"
+        : "opacity-80 hover:opacity-100",
+    );
+
   return (
     <div
       className={
@@ -29,15 +41,15 @@ export const Nav = () => {
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
         <div className="flex basis-2 gap-3 text-lg text-black dark:text-white">
-          <div className={""}>
-            <Link href="#team">Team</Link>
-          </div>
-          <div className={""}>
-            <Link href="#thesis">Thesis</Link>
-          </div>
-          <div className={""}>
-            <Link href="#portfolio">Portolio</Link>
-          </div>
+          <Link href="#team" className={linkClass("team")}>
+            Team
+          </Link>
+          <Link href="#thesis" className={linkClass("thesis")}>
+            Thesis
+          </Link>
+          <Link href="#portfolio" className={linkClass("portfolio")}>
+            Portolio
+          </Link>
         </div>
         <Button
           onClick={() => {

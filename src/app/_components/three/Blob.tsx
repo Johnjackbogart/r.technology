@@ -3,8 +3,12 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import isMobile from "ismobilejs";
 
-export default function Blob() {
+interface BlobProps {
+  points: number;
+}
+export default function Blob({ points }: BlobProps) {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
@@ -20,7 +24,7 @@ export default function Blob() {
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = 100000;
+    const particleCount = isMobile(window.navigator) ? 100000 : 10000;
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {

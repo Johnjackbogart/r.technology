@@ -74,7 +74,7 @@ function MaskedScene() {
   );
 }
 
-function Scene() {
+function Team() {
   return (
     <>
       <MaskedScene />
@@ -83,4 +83,4 @@ function Scene() {
   );
 }
 
-export { Scene };
+export { Team };
