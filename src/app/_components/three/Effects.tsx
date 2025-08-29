@@ -1,13 +1,25 @@
 "use client";
 
-import { useRef, RefObject } from "react";
-import * as THREE from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { easing } from "maath";
 import { useThemeToFill } from "&/theme";
 
-function Effects() {
+type EffectsProps = {
+  damping: number;
+  cameraModifier: CameraModifier;
+};
+export type CameraModifier = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+function Effects({
+  damping = 0.5,
+  cameraModifier = { x: 1, y: 1, z: 1 },
+}: EffectsProps) {
   const theming = useThemeToFill();
   const dark = theming?.theme === "dark" ? true : false;
 
@@ -17,11 +29,11 @@ function Effects() {
     easing.damp3(
       state.camera.position,
       [
-        Math.sin(0.01 * -state.pointer.x) * 50,
-        1 * state.pointer.y * 2,
-        0.5 + Math.cos(0.01 * state.pointer.x) * 5,
+        cameraModifier.x * Math.sin(0.01 * -state.pointer.x) * 50,
+        cameraModifier.y * 1 * state.pointer.y * 2,
+        cameraModifier.z * 0.5 + Math.cos(0.01 * state.pointer.x) * 5,
       ],
-      0.5,
+      damping,
       delta,
     );
     state.camera.lookAt(0, 0, 0);
