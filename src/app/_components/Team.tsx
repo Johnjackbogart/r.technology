@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { useRef, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
-import Blob from "./Blob";
+import Blob from "./three/Blob";
 
 function MaskedScene() {
   const tk = useRef<THREE.Mesh>(null);
@@ -39,7 +39,7 @@ function MaskedScene() {
 
   return (
     <group>
-      <Blob points={25} />
+      <Blob points={2500} />
 
       <Text
         position={[0, 0, 1.5]}
@@ -49,7 +49,7 @@ function MaskedScene() {
         lineHeight={0.75}
         font={"/fonts/geist_black.ttf"}
       >
-        There has to be a healthier way
+        There has to be a funner way
         <Html
           className="custom-selection"
           style={{

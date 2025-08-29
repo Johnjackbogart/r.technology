@@ -60,7 +60,6 @@ export default function Blob({ points }: BlobProps) {
         (targetMousePosition.current.y - mousePosition.current.y) * lerpFactor;
 
       // Project mouse position onto a sphere
-      console.log(currentTime);
       if (currentTime > 5) {
         const mouseX = mousePosition.current.x * Math.PI;
         const mouseY = (mousePosition.current.y * Math.PI) / 2;

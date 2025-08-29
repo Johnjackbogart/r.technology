@@ -1,13 +1,13 @@
 "use client";
-import { useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import { useMemo, Suspense } from "react";
+import { Canvas } from "@react-three/fiber";
 import { useHashPage } from "@/lib/useHashPage";
 import { Effects } from "./Effects";
 import { Loader } from "./Loader";
 import { Hero } from "./Hero";
-import { Portfolio } from "./Portfolio";
-import { Team } from "./Team";
-import { Thesis } from "./Thesis";
+import { Portfolio } from "../Portfolio";
+import { Team } from "../Team";
+import { Thesis } from "../Thesis";
 
 type Page = "Hero" | "Team" | "Thesis" | "Portfolio";
 //gippity
@@ -29,7 +29,7 @@ function ThreeCanvas() {
     >
       <Suspense fallback={<Loader />}>
         <Effects />
-        <Current />
+        <Current key={`page-${page}`} />
       </Suspense>
     </Canvas>
   );
