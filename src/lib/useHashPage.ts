@@ -1,3 +1,4 @@
+//GPT special
 "use client";
 import { useMemo, useSyncExternalStore } from "react";
 
@@ -26,23 +27,27 @@ export function useHashPage(defaultPage: Page = "Hero"): Page {
 
 // Subscribe to ALL ways the URL can change: hashchange, back/forward, pushState/replaceState.
 function subscribeToHash(onChange: () => void) {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === "undefined") return () => null;
 
   const notify = () => onChange();
 
   window.addEventListener("hashchange", notify);
   window.addEventListener("popstate", notify);
 
-  const origPush = history.pushState;
-  const origReplace = history.replaceState;
+  //binding fixes issue:
+  //37:23  Error: Avoid referencing unbound methods which may cause unintentional scoping of `this`.
+  const origPush = history.pushState.bind(history);
+  const origReplace = history.replaceState.bind(history);
 
-  history.pushState = function (...args) {
+  history.pushState = function (...args: Parameters<typeof history.pushState>) {
     // @ts-expect-error – TS isn’t great with the variadic type here
     origPush.apply(this, args);
     notify();
   } as typeof history.pushState;
 
-  history.replaceState = function (...args) {
+  history.replaceState = function (
+    ...args: Parameters<typeof history.pushState>
+  ) {
     // @ts-expect-error – same as above
     origReplace.apply(this, args);
     notify();

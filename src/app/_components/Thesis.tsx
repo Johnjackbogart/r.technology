@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
 import Blob from "./three/Blob";
 
-function MaskedScene() {
+function Scene() {
   const tk = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
 
@@ -44,8 +44,8 @@ function MaskedScene() {
       <Text
         position={[0, 0, 1.5]}
         maxWidth={viewport.width / 10}
-        fontSize={1}
-        textAlign={"center"}
+        fontSize={0.1}
+        textAlign={"left"}
         lineHeight={0.75}
         font={"/fonts/geist_black.ttf"}
       >
@@ -54,10 +54,10 @@ function MaskedScene() {
           className="custom-selection"
           style={{
             color: "transparent",
-            fontSize: "3em",
+            fontSize: ".3em",
             width: "10rem",
             textAlign: "center",
-            lineHeight: "1em",
+            lineHeight: ".1em",
           }}
           transform={true}
         >
@@ -77,7 +77,7 @@ function MaskedScene() {
 function Thesis() {
   return (
     <>
-      <MaskedScene />
+      <Scene />
       <spotLight position={[0, 0, 0]} penumbra={1} castShadow angle={0.2} />
     </>
   );

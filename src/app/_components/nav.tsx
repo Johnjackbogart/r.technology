@@ -37,7 +37,9 @@ export const Nav = () => {
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
-        <R theming={theming} />
+        <Link href="/">
+          <R theming={theming} />
+        </Link>
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
         <div className="flex basis-2 gap-3 text-lg text-black dark:text-white">
