@@ -1,86 +1,60 @@
-"use client";
-import * as THREE from "three";
-import { useRef, useEffect } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
+// Team.tsx (inside your Canvas scene)
+import Image from "next/image";
+import { Html, Float } from "@react-three/drei";
+import { useMemo } from "react";
 import Blob from "./three/Blob";
 
-function MaskedScene() {
-  const tk = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
+const team = [{ name: "John Bogart", title: "Founder", x: 0, y: 0.2, z: -1.2 }];
 
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .custom-selection::selection {
-        background: rgba(.1, .1, .1, .1);
-        color: transparent;
-      }
-      .custom-selection::-moz-selection {
-        background: rgba(.1, .1, .1, .1);
-        color: transparent;
-      }
-    `;
-    document.head.appendChild(style);
+export function Team() {
+  const members = useMemo(() => team, []);
 
-    // Cleanup the style tag on component unmount
-    return () => {
-      document.head.removeChild(style);
-    };
-  });
-
-  useFrame((state) => {
-    if (!tk.current) return;
-    tk.current.rotation.z = 1 * state.clock.getElapsedTime();
-
-    if (!tk.current) return;
-    tk.current.rotation.y = state.clock.elapsedTime / 2;
-  });
-
-  return (
-    <group>
-      <Blob points={2500} />
-
-      <Text
-        position={[0, 0, 1.5]}
-        maxWidth={viewport.width / 10}
-        fontSize={1}
-        textAlign={"center"}
-        lineHeight={0.75}
-        font={"/fonts/geist_black.ttf"}
-      >
-        There has to be a funner way
-        <Html
-          className="custom-selection"
-          style={{
-            color: "transparent",
-            fontSize: "3em",
-            width: "10rem",
-            textAlign: "center",
-            lineHeight: "1em",
-          }}
-          transform={true}
-        >
-          There has to be a healthier way
-        </Html>
-        <MeshTransmissionMaterial
-          background={new THREE.Color().setHex(0xffffff)}
-        />
-      </Text>
-      <ambientLight intensity={10} />
-
-      <pointLight intensity={10} position={[0, 0, 0]} />
-    </group>
-  );
-}
-
-function Team() {
   return (
     <>
-      <MaskedScene />
-      <spotLight position={[0, 0, 0]} penumbra={1} castShadow angle={0.2} />
+      <Blob points={10000} />
+      <group>
+        {members.map((m) => (
+          <Float
+            key={m.name}
+            speed={1}
+            rotationIntensity={0.15}
+            floatIntensity={0.3}
+          >
+            <group position={[m.x, m.y, m.z]}>
+              {/* Real DOM card anchored in 3D */}
+              <Html
+                transform
+                occlude
+                distanceFactor={1} // scales with camera distance
+                position={[0, 0, 6]}
+                wrapperClass="will-change-transform"
+              >
+                <div className="w-[240px] rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm backdrop-blur">
+                  <div className="flex flex-col items-center gap-3 text-center">
+                    <Image
+                      src="/images/me.jpg" // put your file in /public/me.jpg
+                      alt="John Bogart"
+                      width={64} // fixed size -> no layout shift
+                      height={64}
+                      priority // only for your card (first fold)
+                      className="h-16 w-16 select-none rounded-full object-cover ring-1 ring-border/50"
+                      draggable={false}
+                    />
+                    <div className="text-sm font-semibold text-muted-foreground">
+                      {m.name}
+                    </div>
+                    <div className="text-xs text-muted">{m.title}</div>
+                    <div className="mt-3 text-xs text-foreground">
+                      This is my dream! I'm excited to share what we're building
+                      with the world
+                    </div>
+                  </div>
+                </div>
+              </Html>
+            </group>
+          </Float>
+        ))}
+      </group>
     </>
   );
 }
-
-export { Team };
