@@ -4,7 +4,16 @@ import { Html, Float } from "@react-three/drei";
 import { useMemo } from "react";
 import Blob from "./three/Blob";
 
-const team = [{ name: "John Bogart", title: "Founder", x: 0, y: 0.2, z: -1.2 }];
+const team = [
+  {
+    name: "John Bogart",
+    title: "Founder",
+    x: 0,
+    y: 0.2,
+    z: -1.2,
+    img: "/images/me.jpg",
+  },
+];
 
 export function Team() {
   const members = useMemo(() => team, []);
@@ -32,8 +41,8 @@ export function Team() {
                 <div className="w-[240px] rounded-2xl border border-border/50 bg-background/70 p-4 shadow-sm backdrop-blur">
                   <div className="flex flex-col items-center gap-3 text-center">
                     <Image
-                      src="/images/me.jpg" // put your file in /public/me.jpg
-                      alt="John Bogart"
+                      src={m.img}
+                      alt={m.name}
                       width={64} // fixed size -> no layout shift
                       height={64}
                       priority // only for your card (first fold)
