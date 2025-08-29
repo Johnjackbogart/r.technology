@@ -26,7 +26,7 @@ const DAMPING_BY_PAGE: Record<Page, number> = {
 const CAM_MODIFIER_BY_PAGE: Record<Page, CameraModifier> = {
   Hero: { x: 1, y: 1, z: 1 },
   Team: { x: 2, y: 0.25, z: 1 },
-  Thesis: { x: 4, y: 0.5, z: 1 },
+  Thesis: { x: 4, y: 0.05, z: 1 },
   Portfolio: { x: 1, y: 1, z: 1 },
 };
 
@@ -40,7 +40,7 @@ function ThreeCanvas() {
     <Canvas
       gl={{ alpha: true }}
       eventPrefix="client"
-      camera={{ position: [0, 0, 0], fov: 100 }}
+      camera={{ position: [0, 0, 10], fov: 100 }}
     >
       <Suspense fallback={<Loader />}>
         <Effects damping={damping} cameraModifier={cameraModifier} />

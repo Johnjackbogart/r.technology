@@ -21,7 +21,7 @@ export function Team() {
 
   return (
     <>
-      <Blob points={10000} />
+      <Blob points={100000} flopAmount={"-1.0"} eggplantAmount={"5.0"} />
       <group>
         {members.map((m) => (
           <group key={m.name} position={[m.x, m.y, m.z]}>

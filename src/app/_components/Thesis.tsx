@@ -39,7 +39,7 @@ function Scene() {
   return (
     <>
       <group position={[0, 0, -3]}>
-        <Blob points={5000} />
+        <Blob points={50000} flopAmount={"1.0"} />
       </group>
       <group position={[0, 0, -1.2]}>
         <Html

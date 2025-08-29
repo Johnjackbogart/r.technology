@@ -39,7 +39,7 @@ function MaskedScene() {
 
   return (
     <group>
-      <Blob points={100000} />
+      <Blob points={100000} flopAmount={"0.1"} eggplantAmount={"0.0"} />
 
       <Text
         position={[0, 0, 1.5]}
