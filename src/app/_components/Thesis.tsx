@@ -52,10 +52,11 @@ function Scene() {
           <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
             <div className="flex flex-col items-center gap-3 text-center">
               <div className="mt-3 text-xs text-foreground">
-                This is my dream! I'm excited to share what we're building with
-                the world For more about me, check out lorem ipsum loreal;kjsdf
-                as;dlkjf;alsdsdfj;lasdkjf;als f afs;dlkfja;s afsd;lfkja;slj
-                asd;lkfja;lsjdf asd;lfkja;lskdjfas ff;asldkfjalj
+                {
+                  // eslint-disable-next-line react/no-unescaped-entities
+                  `This is my dream! I'm excited to share what we're building with
+                    the world For more about me, check out`
+                }
               </div>
             </div>
           </div>
