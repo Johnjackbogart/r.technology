@@ -3,8 +3,18 @@
 import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import isMobile from "ismobilejs";
 
-export default function Blob() {
+interface BlobProps {
+  points: number;
+  flopAmount?: string;
+  eggplantAmount?: string;
+}
+export default function Blob({
+  points,
+  flopAmount = "1.0",
+  eggplantAmount = "1.0",
+}: BlobProps) {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
@@ -20,7 +30,7 @@ export default function Blob() {
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = 100000;
+    const particleCount = isMobile(window.navigator) ? points : points / 10;
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {
@@ -56,7 +66,6 @@ export default function Blob() {
         (targetMousePosition.current.y - mousePosition.current.y) * lerpFactor;
 
       // Project mouse position onto a sphere
-      console.log(currentTime);
       if (currentTime > 5) {
         const mouseX = mousePosition.current.x * Math.PI;
         const mouseY = (mousePosition.current.y * Math.PI) / 2;
@@ -179,12 +188,39 @@ export default function Blob() {
       return vec3(pos.x, pos.y + wave, pos.z);
     }
 
+    vec3 eggplantMorph(vec3 pos, float t) {
+      float morphFactor = smoothstep(0.0, 1.0, sin(t * 0.2) * 0.05 + 0.05);
+      
+      // Generate a random bulge direction
+      vec3 bulgeDir = normalize(vec3(
+        sin(t * 0.1) + cos(t * 0.1),
+        sin(t * 0.15) + cos(t * 0.25),
+        sin(t * 0.3) + cos(t * 0.5)
+      ));
+      
+      // Project the position onto the bulge direction
+      float projection = dot(pos, bulgeDir);
+      
+      // Elongate in the bulge direction
+      pos += bulgeDir * projection * morphFactor * 0.05;
+      
+      // Bulge out perpendicular to the elongation
+      vec3 perpDir = normalize(pos - bulgeDir * projection);
+      float bulge = smoothstep(-0.5, 0.5, projection) * morphFactor;
+      pos += perpDir * bulge * 0.3;
+      
+      // Add some curvature
+      pos += cross(bulgeDir, perpDir) * sin(projection * PI) * 0.2 * morphFactor;
+      
+      return pos;
+    }
+
     vec3 stringSqueezemorph(vec3 pos, float t) {
       float morphFactor = smoothstep(0.0, 1.0, sin(t * 0.2) * 0.5 + 0.5);
       
       // Create a more complex, undulating plane
       vec3 planeNormal = normalize(vec3(
-        sin(t * 0.23 + pos.x * 0.1) + cos(t * 0.3 + pos.y * 0.1),
+        sin(t * 0.23 + pos.x * 0.1) + cos(t * .3 + pos.y * 0.1),
         sin(t * 0.19 + pos.y * 0.1) + cos(t * 0.21 + pos.z * 0.1),
         sin(t * 0.17 + pos.z * 0.1) + cos(t * 0.15 + pos.x * 0.1)
       ));
@@ -242,8 +278,12 @@ export default function Blob() {
       // Apply wave animation
       pos = waveAnimation(pos, uTime);
       
+      //apply eggplant morph
+      pos = pos + ${eggplantAmount} * eggplantMorph(pos, uTime);
+
       // Apply string squeeze morphing
-      pos = stringSqueezemorph(pos, uTime * 0.3 + 4.0);
+      // you can modify this to add some weird like flopping
+      pos = stringSqueezemorph(pos, uTime * 1.7 - 1.0 * 40.0 * ${flopAmount});
       
       // Spherical undulation
       float noiseScale = 0.5;

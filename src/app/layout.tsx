@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import { type Metadata } from "next";
 import { TRPCReactProvider } from "@/trpc/react";
 import Nav from "&/nav";
@@ -7,7 +7,7 @@ import ThemeProvider from "&/theme";
 
 export const metadata: Metadata = {
   title: "Hi :)",
-  description: "My Personal Website, welcome!",
+  description: "r.tech",
   icons: [
     {
       media: "(prefers-color-scheme: light)",
@@ -26,7 +26,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistMono.className}`}>
       <body>
         <div className="flex h-dvh flex-col">
           <ThemeProvider attribute="class" defaultTheme="system">
