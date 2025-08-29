@@ -7,9 +7,8 @@ import isMobile from "ismobilejs";
 
 interface BlobProps {
   points: number;
-  flopAmount: string;
-  eggplantAmount: string;
-  mod3?: number;
+  flopAmount?: string;
+  eggplantAmount?: string;
 }
 export default function Blob({
   points,

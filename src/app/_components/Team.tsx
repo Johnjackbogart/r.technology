@@ -1,7 +1,7 @@
 // Team.tsx (inside your Canvas scene)
 import Image from "next/image";
 import Link from "next/link";
-import { Html, Float } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useMemo } from "react";
 import Blob from "./three/Blob";
 
