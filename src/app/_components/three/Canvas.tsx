@@ -26,7 +26,7 @@ const DAMPING_BY_PAGE: Record<Page, number> = {
 const CAM_MODIFIER_BY_PAGE: Record<Page, CameraModifier> = {
   Hero: { x: 1, y: 1, z: 1 },
   Team: { x: 2, y: 0.25, z: 1 },
-  Thesis: { x: 1, y: 1, z: 1 },
+  Thesis: { x: 4, y: 0.5, z: 1 },
   Portfolio: { x: 1, y: 1, z: 1 },
 };
 

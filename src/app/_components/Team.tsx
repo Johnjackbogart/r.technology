@@ -33,7 +33,7 @@ export function Team() {
               position={[0, 0, 6]}
               wrapperClass="will-change-transform"
             >
-              <div className="w-[240px] items-center rounded-sm border border-border/50 bg-background/70 p-4 shadow-sm backdrop-blur">
+              <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
                 <div className="flex flex-col items-center gap-3 text-center">
                   <Image
                     src={m.img}

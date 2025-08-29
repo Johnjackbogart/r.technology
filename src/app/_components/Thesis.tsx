@@ -1,13 +1,12 @@
 "use client";
 import * as THREE from "three";
 import { useRef, useEffect } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import Blob from "./three/Blob";
 
 function Scene() {
   const tk = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -38,39 +37,34 @@ function Scene() {
   });
 
   return (
-    <group>
-      <Blob points={5000} />
-
-      <Text
-        position={[0, 0, 1.5]}
-        maxWidth={viewport.width / 10}
-        fontSize={0.1}
-        textAlign={"left"}
-        lineHeight={0.75}
-        font={"/fonts/geist_black.ttf"}
-      >
-        This has to work!
+    <>
+      <group position={[0, 0, -3]}>
+        <Blob points={5000} />
+      </group>
+      <group position={[0, 0, -1.2]}>
         <Html
-          className="custom-selection"
-          style={{
-            color: "transparent",
-            fontSize: ".3em",
-            width: "10rem",
-            textAlign: "center",
-            lineHeight: ".1em",
-          }}
-          transform={true}
+          center
+          occlude
+          distanceFactor={3} // scales with camera distance
+          position={[0, 0, 6]}
+          wrapperClass="will-change-transform"
         >
-          There has to be a healthier way
+          <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="mt-3 text-xs text-foreground">
+                This is my dream! I'm excited to share what we're building with
+                the world For more about me, check out lorem ipsum loreal;kjsdf
+                as;dlkjf;alsdsdfj;lasdkjf;als f afs;dlkfja;s afsd;lfkja;slj
+                asd;lkfja;lsjdf asd;lfkja;lskdjfas ff;asldkfjalj
+              </div>
+            </div>
+          </div>
         </Html>
-        <MeshTransmissionMaterial
-          background={new THREE.Color().setHex(0xffffff)}
-        />
-      </Text>
+      </group>
       <ambientLight intensity={10} />
 
       <pointLight intensity={10} position={[0, 0, 0]} />
-    </group>
+    </>
   );
 }
 
