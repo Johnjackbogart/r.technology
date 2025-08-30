@@ -30,7 +30,9 @@ export default function Blob({
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = isMobile(window.navigator) ? points : points / 10;
+    const particleCount = isMobile(window.navigator).any
+      ? points / 10
+      : points * 2.5;
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {

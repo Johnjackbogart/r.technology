@@ -44,9 +44,9 @@ function Scene() {
       <group position={[0, 0, -1.2]}>
         <Html
           center
-          occlude
+          transform
           distanceFactor={3} // scales with camera distance
-          position={[0, 0, 6]}
+          position={[0, 0, 5]}
           wrapperClass="will-change-transform"
         >
           <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">

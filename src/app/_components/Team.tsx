@@ -28,9 +28,10 @@ export function Team() {
             {/* Real DOM card anchored in 3D */}
             <Html
               center
+              transform
               occlude
               distanceFactor={3} // scales with camera distance
-              position={[0, 0, 6]}
+              position={[0, 0, 5]}
               wrapperClass="will-change-transform"
             >
               <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
