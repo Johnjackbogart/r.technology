@@ -24,7 +24,7 @@ function Effects({
   const theming = useThemeToFill();
   const dark = theming?.theme === "dark" ? true : false;
 
-  const mobileModifier = isMobile(window.navigator) ? 0.01 : 0;
+  const mobileModifier = isMobile(window.navigator).any ? 0.01 : 1;
   useFrame((state, delta) => {
     //can I just import this as a prop ?????
     //stolen from https://discourse.threejs.org/t/how-to-create-glass-material-that-refracts-elements-in-dom/53625/3
