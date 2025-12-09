@@ -30,17 +30,20 @@ export function Team() {
               center
               transform
               occlude
-              distanceFactor={3} // scales with camera distance
-              position={[0, 0, 5]}
-              wrapperClass="will-change-transform"
+              distanceFactor={5} // scales with camera distance
+              position={[0, 0, 3]}
+              style={{
+                WebkitFontSmoothing: "auto",
+                textRendering: "optimizeLegibility",
+              }}
             >
-              <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
+              <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent/50 p-4 shadow-sm">
                 <div className="flex flex-col items-center gap-3 text-center">
                   <Image
                     src={m.img}
                     alt={m.name}
-                    width={64} // fixed size -> no layout shift
-                    height={64}
+                    width={256} // fixed size -> no layout shift
+                    height={256}
                     priority // only for your card (first fold)
                     className="h-16 w-16 select-none rounded-full object-cover ring-1 ring-border/50"
                     draggable={false}
@@ -49,13 +52,16 @@ export function Team() {
                     {m.name}
                   </div>
                   <div className="text-sm text-muted-foreground">{m.title}</div>
-                  <div className="mt-3 text-xs text-foreground">
+                  <div className="mt-3 text-foreground">
                     {
                       // eslint-disable-next-line react/no-unescaped-entities
                       `This is my dream! I'm excited to share what we're building with
                     the world For more about me, check out`
                     }
-                    <Link href="https://www.johnjackbogart.com">
+                    <Link
+                      href="https://www.johnjackbogart.com"
+                      className="underline"
+                    >
                       {" "}
                       my website
                     </Link>
