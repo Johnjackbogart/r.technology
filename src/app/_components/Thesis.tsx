@@ -45,13 +45,18 @@ function Scene() {
         <Html
           center
           transform
+          occlude
           distanceFactor={3} // scales with camera distance
           position={[0, 0, 5]}
-          wrapperClass="will-change-transform"
+          style={{
+            WebkitFontSmoothing: "auto",
+            textRendering: "optimizeLegibility",
+          }}
         >
-          <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent p-4 shadow-sm backdrop-blur">
+          <div className="w-[240px] items-center rounded-sm border border-border/50 bg-transparent/50 p-4 shadow-sm">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="mt-3 text-xs text-foreground">
+              <div className="text-xs text-foreground">
+                test
                 {
                   // eslint-disable-next-line react/no-unescaped-entities
                   `This is my dream! I'm excited to share what we're building with

@@ -8,6 +8,7 @@ import { Hero } from "./Hero";
 import { Portfolio } from "../Portfolio";
 import { Team } from "../Team";
 import { Thesis } from "../Thesis";
+import { Environment } from "./Environment";
 
 type Page = "Hero" | "Team" | "Thesis" | "Portfolio";
 //gippity
@@ -44,6 +45,7 @@ function ThreeCanvas() {
     >
       <Suspense fallback={<Loader />}>
         <Effects damping={damping} cameraModifier={cameraModifier} />
+        <Environment blur={0.6} intensity={1} />
         <Current key={`page-${page}`} />
       </Suspense>
     </Canvas>
