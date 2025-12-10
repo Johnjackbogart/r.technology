@@ -2,11 +2,19 @@
 import * as THREE from "three";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { MeshTransmissionMaterial, Text3D, Center } from "@react-three/drei";
+import { MeshTransmissionMaterial, Text3D, Center, Edges } from "@react-three/drei";
 import isMobile from "ismobilejs";
 import Blob from "./Blob";
+import { useThemeToFill } from "&/theme";
+
+// Simple easing for a stronger "slam" feel
+function easeInCubic(t: number) {
+  return t * t * t;
+}
 
 function MaskedScene() {
+  const theming = useThemeToFill();
+  const dark = theming?.theme === "dark" ? true : false;
   const tk = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
   const mobile = isMobile(window.navigator).any;
@@ -14,68 +22,89 @@ function MaskedScene() {
   const [finished, setFinished] = useState(false);
   const [rolling, setRolling] = useState(false);
   const [flipT, setFlipT] = useState(0);
-  const [nextIndex, setNextIndex] = useState<number | null>(null);
-  const prismRef = useRef<THREE.Group>(null);
+  const [nextWord, setNextWord] = useState<number | null>(null);
 
-  const words = ["healthier", "faster", "easier", "cheaper", "better"];
+  const words = [
+    "healthier",
+    "faster",
+    "easier",
+    "cheaper",
+    "better",
+    "quicker",
+    "smarter",
+    "safer",
+    "happier",
+    "simpler",
+    "cleaner",
+    "greener",
+    "leaner",
+    "fairer",
+    "stronger",
+  ];
+
+  // Shared flip duration (ms) for both scheduling and animation
+  const FLIP_MS = 700;
 
   // Drive the word rotation with decreasing waits and trigger flip animation
   useEffect(() => {
     if (finished) return;
-    const rollMs = 700; // flip duration
-    const durations = [5000, 4000, 3000, 2000];
+
+    const rollMs = FLIP_MS; // flip duration
+    const startHold = 5000; // ms for first transition wait
+    const endHold = 1000; // ms for last transition wait
+    const transitions = Math.max(0, words.length - 1);
+
+    // Build decreasing durations across transitions (geometric ramp)
+    // Ratio chosen so first = startHold and last = endHold
+    const durations = Array.from({ length: transitions }, (_, i) => {
+      if (transitions <= 1) return startHold; // single step edge case
+      const r = Math.pow(endHold / startHold, 1 / (transitions - 1)); // 0<r<1
+      return Math.round(startHold * Math.pow(r, i));
+    });
+
     const timeouts: number[] = [];
     let acc = 0;
 
     durations.forEach((d, i) => {
       acc += d;
       const t = window.setTimeout(() => {
-        setNextIndex(i + 1);
+        setNextWord(i + 1);
         setRolling(true);
         const done = window.setTimeout(() => {
           setWordIndex(i + 1);
           setRolling(false);
-          setNextIndex(null);
+          setNextWord(null);
         }, rollMs);
         timeouts.push(done);
       }, acc);
       timeouts.push(t);
     });
 
-    // After showing "better" for 1s, finish
+    // After the final word is shown for a beat, finish
+    const finalHold = 5000;
     const finishTimeout = window.setTimeout(
       () => setFinished(true),
-      acc + 1000,
+      acc + finalHold,
     );
     timeouts.push(finishTimeout);
 
     return () => {
       timeouts.forEach((id) => clearTimeout(id));
     };
-  }, [finished]);
-
-  const line = useMemo(() => {
-    const base = ["There", "has", "to", "be", "a"];
-    if (finished) {
-      return [...base, "way"].join("\n");
-    }
-    const current = words[Math.min(wordIndex, words.length - 1)];
-    return [...base, " ", "way"].join("\n");
-  }, [finished, wordIndex]);
+  }, [finished, words.length]);
 
   const currentWord = words[Math.min(wordIndex, words.length - 1)];
-  const upcomingWord = nextIndex != null ? words[nextIndex] : currentWord;
 
   // Animate the prism flip when rolling starts
   useEffect(() => {
     if (!rolling) return;
     const start = performance.now();
-    const dur = 700;
+    const dur = FLIP_MS;
     let raf = 0 as number;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      if (prismRef.current) prismRef.current.rotation.x = Math.PI * 0.5 * t;
-      setFlipT(t);
+      const e = easeInCubic(t);
+      setFlipT(e);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -83,8 +112,7 @@ function MaskedScene() {
   }, [rolling]);
 
   useEffect(() => {
-    if (!rolling && prismRef.current) {
-      prismRef.current.rotation.x = 0;
+    if (!rolling) {
       setFlipT(0);
     }
   }, [rolling]);
@@ -118,11 +146,11 @@ function MaskedScene() {
   });
 
   const size = 0.8;
-  const gap = size * 0.9;
+  const gap = size * 1;
   const baseWords = ["There", "has", "to", "be", "a"] as const;
   const totalLines = finished ? baseWords.length + 1 : baseWords.length + 2;
   const startY = ((totalLines - 1) / 2) * gap;
-  const double = mobile ? [1] : [1, 0.99];
+  const double = mobile ? [1] : [1];
 
   return (
     <group>
@@ -147,8 +175,16 @@ function MaskedScene() {
                       {w}
                       <MeshTransmissionMaterial
                         attach="material-0"
-                        background={new THREE.Color().setHex(0x000000)}
-                        color={new THREE.Color().setHex(0xb6f2c8)}
+                        background={
+                          dark
+                            ? new THREE.Color().setHex(0x000000)
+                            : new THREE.Color().setHex(0xdddddd)
+                        }
+                        color={
+                          dark
+                            ? new THREE.Color().setHex(0xb6f2c8)
+                            : new THREE.Color().setHex(0xf5f5f5)
+                        }
                         thickness={0.2}
                         roughness={0.1}
                         transmission={1}
@@ -158,11 +194,16 @@ function MaskedScene() {
                       />
                       <meshStandardMaterial
                         attach="material-1"
-                        color="#253D2C"
+                        color={
+                          dark
+                            ? new THREE.Color().setHex(0x253d2c)
+                            : new THREE.Color().setHex(0xf5f5f5)
+                        }
                         roughness={0.85}
                         metalness={0.05}
                         envMapIntensity={0.6}
                       />
+                      <Edges threshold={25} scale={1.001} color={dark ? "#b6f2c8" : "#253D2C"} />
                     </Text3D>
                   </Center>
                 </group>
@@ -171,127 +212,70 @@ function MaskedScene() {
 
             {!finished && (
               <group position={[0, startY - baseWords.length * gap, 0]}>
-                <group ref={prismRef}>
-                  <group
-                    matrixAutoUpdate={false}
-                    onUpdate={(g) =>
-                      //italic
-                      g.matrix.set(
-                        1,
-                        0.2,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                      )
-                    }
-                    visible={!rolling || flipT < 0.5}
-                  >
-                    <group>
-                      <Center disableY disableZ>
-                        <Text3D
-                          font={"/fonts/geist_black.typeface.json"}
-                          size={size}
-                          height={0.08}
-                          bevelEnabled
-                          bevelThickness={0.02}
-                          bevelSize={0.02}
-                          bevelSegments={2}
-                          curveSegments={8}
-                        >
-                          {currentWord}
-                          <MeshTransmissionMaterial
-                            attach="material-0"
-                            background={new THREE.Color().setHex(0x000000)}
-                            color={new THREE.Color().setHex(0xb6f2c8)}
-                            thickness={0.2}
-                            roughness={0.1}
-                            transmission={0.99}
-                            ior={1.25}
-                            chromaticAberration={0}
-                          />
-                          <meshStandardMaterial
-                            attach="material-1"
-                            color="#253D2C"
-                            roughness={0.85}
-                            metalness={0.05}
-                            envMapIntensity={0.6}
-                          />
-                        </Text3D>
-                      </Center>
+                <Center key={currentWord} disableY disableZ>
+                  <group rotation={[Math.PI * 0.5 * flipT, 0, 0]}>
+                    <group
+                      matrixAutoUpdate={false}
+                      onUpdate={(g) =>
+                        // italic skew
+                        g.matrix.set(
+                          1,
+                          0.2,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                        )
+                      }
+                      visible={!rolling || flipT < 0.5}
+                    >
+                      <Text3D
+                        font={"/fonts/geist_black.typeface.json"}
+                        size={size}
+                        height={0.08}
+                        bevelEnabled
+                        bevelThickness={0.02}
+                        bevelSize={0.02}
+                        bevelSegments={2}
+                        curveSegments={8}
+                      >
+                        {currentWord}
+                        <MeshTransmissionMaterial
+                          attach="material-0"
+                          background={new THREE.Color().setHex(0x000000)}
+                          color={
+                            dark
+                              ? new THREE.Color().set("#f5f5f5")
+                              : new THREE.Color().set("#253D2C")
+                          }
+                          thickness={0.2}
+                          roughness={0.1}
+                          transmission={0.99}
+                          ior={1.25}
+                          chromaticAberration={0}
+                        />
+                        <meshStandardMaterial
+                          attach="material-1"
+                          color="#253D2C"
+                          roughness={0.85}
+                          metalness={0.05}
+                          envMapIntensity={0.6}
+                        />
+                        <Edges threshold={25} scale={1.001} color={dark ? "#f5f5f5" : "#253D2C"} />
+                      </Text3D>
                     </group>
                   </group>
-                  <group
-                    rotation={[Math.PI / 2, 0, 0]}
-                    matrixAutoUpdate={false}
-                    onUpdate={(g) =>
-                      g.matrix.set(
-                        1,
-                        0.2,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        0,
-                        0,
-                        1,
-                      )
-                    }
-                    visible={rolling && flipT >= 0.5}
-                  >
-                    <group>
-                      <Center disableY disableZ>
-                        <Text3D
-                          font={"/fonts/geist_black.typeface.json"}
-                          size={size}
-                          height={0.08}
-                          bevelEnabled
-                          bevelThickness={0.02}
-                          bevelSize={0.02}
-                          bevelSegments={2}
-                          curveSegments={8}
-                        >
-                          {upcomingWord}
-
-                          <MeshTransmissionMaterial
-                            attach="material-0"
-                            background={new THREE.Color().setHex(0x000000)}
-                            color={new THREE.Color().setHex(0xb6f2c8)}
-                            thickness={0.2}
-                            roughness={0.1}
-                            transmission={0.99}
-                            ior={1.25}
-                            chromaticAberration={0}
-                          />
-                          <meshStandardMaterial
-                            attach="material-1"
-                            color="#253D2C"
-                            roughness={0.85}
-                            metalness={0.05}
-                            envMapIntensity={0.6}
-                          />
-                        </Text3D>
-                      </Center>
-                    </group>
-                  </group>
-                </group>
+                </Center>
               </group>
             )}
 
@@ -317,21 +301,35 @@ function MaskedScene() {
                   way
                   <MeshTransmissionMaterial
                     attach="material-0"
-                    background={new THREE.Color().setHex(0x000000)}
-                    color={new THREE.Color().setHex(0xb6f2c8)}
+                    background={
+                      dark
+                        ? new THREE.Color().setHex(0x000000)
+                        : new THREE.Color().setHex(0xdddddd)
+                    }
+                    color={
+                      dark
+                        ? new THREE.Color().setHex(0xb6f2c8)
+                        : new THREE.Color().setHex(0xf5f5f5)
+                    }
                     thickness={0.2}
                     roughness={0.1}
                     transmission={1}
+                    distortion={0}
                     ior={1.25}
                     chromaticAberration={0}
                   />
                   <meshStandardMaterial
                     attach="material-1"
-                    color="#253D2C"
+                    color={
+                      dark
+                        ? new THREE.Color().setHex(0x253d2c)
+                        : new THREE.Color().setHex(0xf5f5f5)
+                    }
                     roughness={0.85}
                     metalness={0.05}
                     envMapIntensity={0.6}
                   />
+                  <Edges threshold={25} scale={1.001} color={dark ? "#b6f2c8" : "#253D2C"} />
                 </Text3D>
               </Center>
             </group>

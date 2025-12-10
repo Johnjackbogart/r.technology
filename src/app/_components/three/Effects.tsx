@@ -51,7 +51,7 @@ function Effects({
       <Bloom
         mipmapBlur
         luminanceThreshold={0}
-        intensity={dark ? 0.1 : -0.1}
+        intensity={dark ? 0.1 : 1}
         levels={8}
       />
     </EffectComposer>
