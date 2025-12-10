@@ -29,7 +29,7 @@ function MaskedScene() {
   const [flipT, setFlipT] = useState(1);
   const [nextWord, setNextWord] = useState<number | null>(null);
   const [tiltSign, setTiltSign] = useState<1 | -1>(1);
-  const [outgoingWord, setOutgoingWord] = useState<string | null>(null);
+  const [outgoingWord, setOutgoingWord] = useState<string | null | undefined>(null);
   const [outgoingTilt, setOutgoingTilt] = useState<1 | -1>(1);
   const [fading, setFading] = useState(false);
   const [fadeT, setFadeT] = useState(0);
@@ -432,7 +432,8 @@ function MaskedScene() {
                 )}
 
                 {/* Incoming layer: only render while animating to avoid duplicates */}
-                {((introRolling && introStarted) || (rolling && nextWord !== null)) && (
+                {((introRolling && introStarted) ||
+                  (rolling && nextWord !== null)) && (
                   <group
                     scale={1.5}
                     position={[0, incomingLift * (1 - flipT), (1 - flipT) * 8]}
@@ -444,7 +445,10 @@ function MaskedScene() {
                     renderOrder={2}
                   >
                     {/* Center raw text so translation/rotation act around its center */}
-                    <Center key={`${introRolling ? currentWord : (nextWord !== null ? words[nextWord] : currentWord)}` } disableZ>
+                    <Center
+                      key={`${introRolling ? currentWord : nextWord !== null ? words[nextWord] : currentWord}`}
+                      disableZ
+                    >
                       <group
                         matrixAutoUpdate={false}
                         onUpdate={(g) =>
@@ -479,7 +483,11 @@ function MaskedScene() {
                           bevelSegments={2}
                           curveSegments={8}
                         >
-                          {introRolling ? currentWord : (nextWord !== null ? words[nextWord] : currentWord)}
+                          {introRolling
+                            ? currentWord
+                            : nextWord !== null
+                              ? words[nextWord]
+                              : currentWord}
                           <MeshTransmissionMaterial
                             attach="material-0"
                             background={new THREE.Color().setHex(0x000000)}
