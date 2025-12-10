@@ -53,13 +53,13 @@ export function Team() {
                   </div>
                   <div className="text-sm text-muted-foreground">{m.title}</div>
                   <div className="mt-3 text-foreground">
-                    This is my dream! I'm excited to share what we're building
-                    with the world For more about me, check out
+                    {
+                      "This is my dream! I'm excited to share what we're building with the world For more about me, check out "
+                    }
                     <Link
                       href="https://www.johnjackbogart.com"
                       className="underline"
                     >
-                      {" "}
                       my website
                     </Link>
                   </div>

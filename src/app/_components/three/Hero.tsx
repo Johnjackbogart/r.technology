@@ -2,13 +2,7 @@
 import * as THREE from "three";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import {
-  Text,
-  Html,
-  MeshTransmissionMaterial,
-  Text3D,
-  Center,
-} from "@react-three/drei";
+import { MeshTransmissionMaterial, Text3D, Center } from "@react-three/drei";
 import Blob from "./Blob";
 
 function MaskedScene() {
