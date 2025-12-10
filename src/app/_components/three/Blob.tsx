@@ -9,11 +9,13 @@ interface BlobProps {
   points: number;
   flopAmount?: string;
   eggplantAmount?: string;
+  speed?: number; // overall animation speed multiplier
 }
 export default function Blob({
   points,
   flopAmount = "1.0",
   eggplantAmount = "1.0",
+  speed = 0.5,
 }: BlobProps) {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
@@ -25,6 +27,7 @@ export default function Blob({
     uTime: { value: 0 },
     uMouse: { value: new THREE.Vector3(0, 0, 1) },
     uResolution: { value: new THREE.Vector2(size.width, size.height) },
+    uSpeed: { value: speed },
   });
 
   const [positions, colors] = useMemo(() => {
@@ -59,6 +62,7 @@ export default function Blob({
 
     if (mesh.current) {
       uniforms.current.uTime.value = currentTime;
+      uniforms.current.uSpeed.value = speed;
 
       // Apply momentum to mouse movement
       const lerpFactor = 1 - Math.pow(0.001, deltaTime);
@@ -81,7 +85,7 @@ export default function Blob({
       }
 
       // Apply rotation to the entire particle field
-      mesh.current.rotation.y += deltaTime * 0.1;
+      mesh.current.rotation.y += deltaTime * 0.1 * speed;
     }
   });
 
@@ -107,6 +111,7 @@ export default function Blob({
 
   const vertexShader = `
     uniform float uTime;
+    uniform float uSpeed;
     uniform vec3 uMouse;
     attribute vec3 color;
     varying vec3 vColor;
@@ -252,22 +257,39 @@ export default function Blob({
       return pos;
     }
 
+    // Dark forest green palette anchored at #253D2C, desaturated (no moss tint)
     vec3 tieDyeColor(vec3 pos, float t) {
       float scale = 0.15;
       float speed = 0.2;
-      
+
       float n1 = snoise(vec3(pos.x * scale, pos.y * scale, t * speed)) * 0.5 + 0.5;
-      float n2 = snoise(vec3(pos.y * scale, pos.z * scale, t * speed + 100.0)) * 0.5 + 0.5;
-      float n3 = snoise(vec3(pos.z * scale, pos.x * scale, t * speed + 200.0)) * 0.5 + 0.5;
+      float n2 = snoise(vec3(pos.y * scale, pos.z * scale, t * speed + 31.0)) * 0.5 + 0.5;
+      float n3 = snoise(vec3(pos.z * scale, pos.x * scale, t * speed + 73.0)) * 0.5 + 0.5;
 
-      vec3 color1 = vec3(1.0, 0.2, 0.2); // Red
-      vec3 color2 = vec3(0.5, 0.0, 0.5); // Purple
-      vec3 color3 = vec3(0.2, 0.2, 1.0); // Blue
-      vec3 color5 = vec3(0.0, 0.0, 0.0); // Black
+      // Base forest color: #253D2C (RGB 37,61,44)
+      vec3 BASE = vec3(0.145, 0.239, 0.173);
+      // Darker variants derived from BASE (kept in green gamut)
+      vec3 G1 = BASE * 0.55; // very dark
+      vec3 G2 = BASE * 0.70; // dark
+      vec3 G3 = BASE * 0.85; // mid-dark
+      vec3 G4 = BASE;        // base
+      vec3 G5 = BASE;        // no moss tint
 
-      vec3 finalColor = mix(color1, color2, n1);
-      finalColor = mix(finalColor, color3, n2);
-      finalColor = mix(finalColor, color5, snoise(pos * 0.2 + t * 0.1) * 0.1 + 0.5);
+      // Mix greens with strong bias to darkest tones (G1/G2)
+      vec3 gA = mix(G1, G2, n1);              // darkest pair
+      vec3 gB = mix(G3, G4, n2 * 0.5);        // limit mid contribution
+      vec3 gMid = gB;                          // remove lightest/moss contribution entirely
+      vec3 greens = mix(gA, gMid, 0.20);      // 80% weight to darkest greens
+
+      // Use greens only; keep it anchored to BASE
+      vec3 color = mix(greens, BASE, 0.30);
+
+      // Muted brightness modulation for darker, earthy look
+      float v = snoise(pos * 0.25 + t * 0.15) * 0.5 + 0.5; // 0..1
+      float brightness = 0.26 + 0.10 * v; // 0.26..0.36
+
+      // No desaturation: keep full saturation of the dark greens
+      vec3 finalColor = clamp(color * brightness, 0.0, 1.0);
 
       return finalColor;
     }
@@ -275,17 +297,17 @@ export default function Blob({
     void main() {
       vec3 pos = position;
       
-      float t = uTime * 0.5;
+      float t = uTime * 0.5 * uSpeed;
       
       // Apply wave animation
-      pos = waveAnimation(pos, uTime);
+      pos = waveAnimation(pos, uTime * uSpeed);
       
       //apply eggplant morph
-      pos = pos + ${eggplantAmount} * eggplantMorph(pos, uTime);
+      pos = pos + ${eggplantAmount} * eggplantMorph(pos, uTime * uSpeed);
 
       // Apply string squeeze morphing
       // you can modify this to add some weird like flopping
-      pos = stringSqueezemorph(pos, uTime * 1.7 - 1.0 * 40.0 * ${flopAmount});
+      pos = stringSqueezemorph(pos, uTime * 1.7 * uSpeed - 1.0 * 40.0 * ${flopAmount});
       
       // Spherical undulation
       float noiseScale = 0.5;
@@ -305,7 +327,7 @@ export default function Blob({
       }
 
       // Apply tie-dye coloring
-      vColor = tieDyeColor(pos, uTime);
+      vColor = tieDyeColor(pos, uTime * uSpeed);
 
       // Calculate distance for glow effect
       vDistance = length(pos) / 10.0;
@@ -325,7 +347,7 @@ export default function Blob({
       
       // Apply glow effect
       float glow = 1.0 - smoothstep(0.0, 1.0, vDistance);
-      vec3 finalColor = mix(vColor, vec3(1.0), glow * 0.5);
+      vec3 finalColor = mix(vColor, vec3(1.0), glow * 0.15);
       
       gl_FragColor = vec4(finalColor, 1.0);
     }

@@ -1,13 +1,97 @@
 "use client";
 import * as THREE from "three";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Text, Html, MeshTransmissionMaterial } from "@react-three/drei";
+import {
+  Text,
+  Html,
+  MeshTransmissionMaterial,
+  Text3D,
+  Center,
+} from "@react-three/drei";
 import Blob from "./Blob";
 
 function MaskedScene() {
   const tk = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
+  const [wordIndex, setWordIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [rolling, setRolling] = useState(false);
+  const [flipT, setFlipT] = useState(0);
+  const [nextIndex, setNextIndex] = useState<number | null>(null);
+  const prismRef = useRef<THREE.Group>(null);
+
+  const words = ["healthier", "faster", "easier", "cheaper", "better"];
+
+  // Drive the word rotation with decreasing waits and trigger flip animation
+  useEffect(() => {
+    if (finished) return;
+    const rollMs = 700; // flip duration
+    const durations = [5000, 4000, 3000, 2000];
+    const timeouts: number[] = [];
+    let acc = 0;
+
+    durations.forEach((d, i) => {
+      acc += d;
+      const t = window.setTimeout(() => {
+        setNextIndex(i + 1);
+        setRolling(true);
+        const done = window.setTimeout(() => {
+          setWordIndex(i + 1);
+          setRolling(false);
+          setNextIndex(null);
+        }, rollMs);
+        timeouts.push(done);
+      }, acc);
+      timeouts.push(t);
+    });
+
+    // After showing "better" for 1s, finish
+    const finishTimeout = window.setTimeout(
+      () => setFinished(true),
+      acc + 1000,
+    );
+    timeouts.push(finishTimeout);
+
+    return () => {
+      timeouts.forEach((id) => clearTimeout(id));
+    };
+  }, [finished]);
+
+  const line = useMemo(() => {
+    const base = ["There", "has", "to", "be", "a"];
+    if (finished) {
+      return [...base, "way"].join("\n");
+    }
+    const current = words[Math.min(wordIndex, words.length - 1)];
+    return [...base, " ", "way"].join("\n");
+  }, [finished, wordIndex]);
+
+  const currentWord = words[Math.min(wordIndex, words.length - 1)];
+  const upcomingWord = nextIndex != null ? words[nextIndex] : currentWord;
+
+  // Animate the prism flip when rolling starts
+  useEffect(() => {
+    if (!rolling) return;
+    const start = performance.now();
+    const dur = 700;
+    let raf = 0 as number;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / dur);
+      if (prismRef.current) prismRef.current.rotation.x = Math.PI * 0.5 * t;
+      setFlipT(t);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [rolling]);
+
+  useEffect(() => {
+    if (!rolling && prismRef.current) {
+      prismRef.current.rotation.x = 0;
+      setFlipT(0);
+    }
+  }, [rolling]);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -37,38 +121,169 @@ function MaskedScene() {
     tk.current.rotation.y = state.clock.elapsedTime / 2;
   });
 
+  const size = 0.8;
+  const gap = size * 0.9;
+  const baseWords = ["There", "has", "to", "be", "a"] as const;
+  const totalLines = finished ? baseWords.length + 1 : baseWords.length + 2;
+  const startY = ((totalLines - 1) / 2) * gap;
+
   return (
     <group>
       <Blob points={100000} flopAmount={"0.1"} eggplantAmount={"0.0"} />
 
-      <Text
-        position={[0, 0, 1.5]}
-        maxWidth={viewport.width / 10}
-        fontSize={1}
-        textAlign={"center"}
-        lineHeight={0.75}
-        font={"/fonts/geist_black.ttf"}
-      >
-        There has to be a healthier way
-        <Html
-          className="custom-selection"
-          style={{
-            color: "transparent",
-            fontSize: "3em",
-            width: "10rem",
-            textAlign: "center",
-            lineHeight: "1em",
-          }}
-          transform={true}
-        >
-          There has to be a healthier way
-        </Html>
-        <MeshTransmissionMaterial
-          background={new THREE.Color().setHex(0xffffff)}
-        />
-      </Text>
-      <ambientLight intensity={10} />
+      <group position={[0, 0, 1.5]}>
+        <Center>
+          <group>
+            <Center>
+              {baseWords.map((w, i) => (
+                <Text3D
+                  key={w}
+                  font={"/fonts/geist_black.typeface.json"}
+                  size={size}
+                  height={0.05}
+                  bevelEnabled
+                  bevelThickness={0.01}
+                  bevelSize={0.01}
+                  curveSegments={8}
+                  position={[0, startY - i * gap, 0]}
+                >
+                  {w}
+                  <MeshTransmissionMaterial
+                    background={new THREE.Color().setHex(0xffffff)}
+                    color={new THREE.Color().setHex(0xffffff)}
+                    thickness={0.05}
+                    roughness={0.05}
+                    transmission={0.99}
+                    ior={0.9}
+                    chromaticAberration={0.9}
+                  />
+                </Text3D>
+              ))}
+            </Center>
+          </group>
 
+          {!finished && (
+            <group position={[0, startY - baseWords.length * gap, 0]}>
+              <group ref={prismRef}>
+                <group
+                  matrixAutoUpdate={false}
+                  onUpdate={(g) =>
+                    //italic
+                    g.matrix.set(
+                      1,
+                      0.2,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                    )
+                  }
+                  visible={!rolling || flipT < 0.5}
+                >
+                  <Text3D
+                    font={"/fonts/geist_black.typeface.json"}
+                    size={size}
+                    height={0.05}
+                    bevelEnabled
+                    bevelThickness={0.01}
+                    bevelSize={0.005}
+                    curveSegments={8}
+                  >
+                    {currentWord}
+                    <MeshTransmissionMaterial
+                      background={new THREE.Color().setHex(0xffffff)}
+                      color={new THREE.Color().setHex(0x2f6848)}
+                      thickness={0.15}
+                      roughness={0.25}
+                      transmission={0.1}
+                      ior={1.1}
+                      chromaticAberration={0.01}
+                    />
+                  </Text3D>
+                </group>
+                <group
+                  rotation={[Math.PI / 2, 0, 0]}
+                  matrixAutoUpdate={false}
+                  onUpdate={(g) =>
+                    g.matrix.set(
+                      1,
+                      0.2,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                      1,
+                    )
+                  }
+                  visible={rolling && flipT >= 0.5}
+                >
+                  <Text3D
+                    font={"/fonts/geist_black.typeface.json"}
+                    size={size}
+                    height={0.05}
+                    bevelEnabled
+                    bevelThickness={0.01}
+                    bevelSize={0.005}
+                    curveSegments={8}
+                  >
+                    {upcomingWord}
+
+                    <MeshTransmissionMaterial
+                      background={new THREE.Color().setHex(0xffffff)}
+                      color={new THREE.Color().setHex(0x2f6848)}
+                      thickness={0.15}
+                      roughness={0.25}
+                      transmission={1}
+                      ior={1.1}
+                      chromaticAberration={0.01}
+                    />
+                  </Text3D>
+                </group>
+              </group>
+            </group>
+          )}
+
+          <Text3D
+            font={"/fonts/geist_black.typeface.json"}
+            size={size}
+            height={0.05}
+            bevelEnabled
+            bevelThickness={0.01}
+            bevelSize={0.005}
+            curveSegments={8}
+            position={[
+              0,
+              startY -
+                (finished ? baseWords.length : baseWords.length + 1) * gap,
+              0,
+            ]}
+          >
+            way
+            <meshStandardMaterial color="#ffffff" />
+          </Text3D>
+        </Center>
+      </group>
+
+      <ambientLight intensity={10} />
       <pointLight intensity={10} position={[0, 0, 0]} />
     </group>
   );
