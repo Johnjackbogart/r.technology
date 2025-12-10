@@ -3,11 +3,13 @@ import * as THREE from "three";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { MeshTransmissionMaterial, Text3D, Center } from "@react-three/drei";
+import isMobile from "ismobilejs";
 import Blob from "./Blob";
 
 function MaskedScene() {
   const tk = useRef<THREE.Mesh>(null);
   const { viewport } = useThree();
+  const mobile = isMobile(window.navigator).any;
   const [wordIndex, setWordIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [rolling, setRolling] = useState(false);
@@ -120,7 +122,7 @@ function MaskedScene() {
   const baseWords = ["There", "has", "to", "be", "a"] as const;
   const totalLines = finished ? baseWords.length + 1 : baseWords.length + 2;
   const startY = ((totalLines - 1) / 2) * gap;
-  const double = [1, 0.99];
+  const double = mobile ? [1] : [1, 0.99];
 
   return (
     <group>
