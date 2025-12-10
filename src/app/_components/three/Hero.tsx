@@ -2,7 +2,12 @@
 import * as THREE from "three";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { MeshTransmissionMaterial, Text3D, Center, Edges } from "@react-three/drei";
+import {
+  MeshTransmissionMaterial,
+  Text3D,
+  Center,
+  Edges,
+} from "@react-three/drei";
 import isMobile from "ismobilejs";
 import Blob from "./Blob";
 import { useThemeToFill } from "&/theme";
@@ -21,8 +26,15 @@ function MaskedScene() {
   const [wordIndex, setWordIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [rolling, setRolling] = useState(false);
-  const [flipT, setFlipT] = useState(0);
+  const [flipT, setFlipT] = useState(1);
   const [nextWord, setNextWord] = useState<number | null>(null);
+  const [tiltSign, setTiltSign] = useState<1 | -1>(1);
+  const [outgoingWord, setOutgoingWord] = useState<string | null>(null);
+  const [outgoingTilt, setOutgoingTilt] = useState<1 | -1>(1);
+  const [fading, setFading] = useState(false);
+  const [fadeT, setFadeT] = useState(0);
+  const wordIndexRef = useRef(wordIndex);
+  const tiltSignRef = useRef<1 | -1>(tiltSign);
 
   const words = [
     "healthier",
@@ -44,6 +56,7 @@ function MaskedScene() {
 
   // Shared flip duration (ms) for both scheduling and animation
   const FLIP_MS = 700;
+  const TILT_ANGLE = 0.1;
 
   // Drive the word rotation with decreasing waits and trigger flip animation
   useEffect(() => {
@@ -68,12 +81,27 @@ function MaskedScene() {
     durations.forEach((d, i) => {
       acc += d;
       const t = window.setTimeout(() => {
+        // Prepare incoming animation: set progress to 0
+        setFlipT(0);
+        setFading(false);
+        setFadeT(0);
         setNextWord(i + 1);
         setRolling(true);
         const done = window.setTimeout(() => {
+          // Capture outgoing state at the instant before swap
+          const prevIdx = Math.min(wordIndexRef.current, words.length - 1);
+          const prevTilt = tiltSignRef.current;
+          setOutgoingWord(words[prevIdx]);
+          setOutgoingTilt(prevTilt);
+
+          // Swap to the new word and new tilt for the display layer
           setWordIndex(i + 1);
           setRolling(false);
           setNextWord(null);
+          // Alternate tilt AFTER the animation completes
+          setTiltSign((s) => (s === 1 ? -1 : 1));
+          // Begin fading the outgoing word once the new word is in place
+          setFading(true);
         }, rollMs);
         timeouts.push(done);
       }, acc);
@@ -94,8 +122,36 @@ function MaskedScene() {
   }, [finished, words.length]);
 
   const currentWord = words[Math.min(wordIndex, words.length - 1)];
+  // Keep refs in sync so timeouts use the latest values
+  useEffect(() => {
+    wordIndexRef.current = wordIndex;
+  }, [wordIndex]);
+  useEffect(() => {
+    tiltSignRef.current = tiltSign;
+  }, [tiltSign]);
+  const outgoingOpacity = fading ? 1 - fadeT : 1;
 
-  // Animate the prism flip when rolling starts
+  // Fade-out driver once fading starts
+  useEffect(() => {
+    if (!fading) return;
+    const FADE_MS = 300;
+    const start = performance.now();
+    let raf = 0 as number;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / FADE_MS);
+      setFadeT(t);
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else {
+        setFading(false);
+        setOutgoingWord(null);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [fading]);
+  const incomingOpacity = rolling && nextWord !== null ? flipT : 1;
+
+  // Animate the word translating in from in front of the scene when rolling starts
   useEffect(() => {
     if (!rolling) return;
     const start = performance.now();
@@ -103,18 +159,13 @@ function MaskedScene() {
     let raf = 0 as number;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      const e = easeInCubic(t);
+      // easeOutCubic
+      const e = 1 - Math.pow(1 - t, 3);
       setFlipT(e);
       if (t < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [rolling]);
-
-  useEffect(() => {
-    if (!rolling) {
-      setFlipT(0);
-    }
   }, [rolling]);
 
   useEffect(() => {
@@ -147,8 +198,8 @@ function MaskedScene() {
 
   const size = 0.8;
   const gap = size * 1;
-  const baseWords = ["There", "has", "to", "be", "a"] as const;
-  const totalLines = finished ? baseWords.length + 1 : baseWords.length + 2;
+  const baseLines = ["There", "has to be a"] as const;
+  const totalLines = finished ? baseLines.length + 1 : baseLines.length + 2;
   const startY = ((totalLines - 1) / 2) * gap;
   const double = mobile ? [1] : [1];
 
@@ -159,8 +210,8 @@ function MaskedScene() {
         <group key={d} scale={d}>
           <group key={d} position={[0, 0, 1.5]}>
             <group>
-              {baseWords.map((w, i) => (
-                <group key={w} position={[0, startY - i * gap, 0]}>
+              {baseLines.map((line, i) => (
+                <group key={line} position={[0, startY - i * gap, 0]}>
                   <Center disableY disableZ>
                     <Text3D
                       font={"/fonts/geist_black.typeface.json"}
@@ -172,7 +223,7 @@ function MaskedScene() {
                       bevelSegments={2}
                       curveSegments={8}
                     >
-                      {w}
+                      {line}
                       <MeshTransmissionMaterial
                         attach="material-0"
                         background={
@@ -203,7 +254,11 @@ function MaskedScene() {
                         metalness={0.05}
                         envMapIntensity={0.6}
                       />
-                      <Edges threshold={25} scale={1.001} color={dark ? "#b6f2c8" : "#253D2C"} />
+                      <Edges
+                        threshold={25}
+                        scale={1.001}
+                        color={dark ? "#b6f2c8" : "#253D2C"}
+                      />
                     </Text3D>
                   </Center>
                 </group>
@@ -211,13 +266,13 @@ function MaskedScene() {
             </group>
 
             {!finished && (
-              <group position={[0, startY - baseWords.length * gap, 0]}>
-                <Center key={currentWord} disableY disableZ>
-                  <group rotation={[Math.PI * 0.5 * flipT, 0, 0]}>
+              <group position={[0, startY - baseLines.length * gap, 0]}>
+                {/* Display layer: always shows the current settled word at z=0 */}
+                <group scale={1.5} rotation={[tiltSign * TILT_ANGLE, 0, tiltSign * TILT_ANGLE]} renderOrder={0}>
+                  <Center key={`${currentWord}`} disableZ>
                     <group
                       matrixAutoUpdate={false}
                       onUpdate={(g) =>
-                        // italic skew
                         g.matrix.set(
                           1,
                           0.2,
@@ -237,7 +292,6 @@ function MaskedScene() {
                           1,
                         )
                       }
-                      visible={!rolling || flipT < 0.5}
                     >
                       <Text3D
                         font={"/fonts/geist_black.typeface.json"}
@@ -271,11 +325,177 @@ function MaskedScene() {
                           metalness={0.05}
                           envMapIntensity={0.6}
                         />
-                        <Edges threshold={25} scale={1.001} color={dark ? "#f5f5f5" : "#253D2C"} />
+                        <Edges
+                          threshold={25}
+                          scale={1.001}
+                          color={dark ? "#f5f5f5" : "#253D2C"}
+                        />
                       </Text3D>
                     </group>
+                  </Center>
+                </group>
+
+                {/* Incoming layer: only render while animating to avoid duplicates */}
+                {rolling && nextWord !== null && (
+                  <group
+                    scale={1.5}
+                    position={[0, 0, (1 - flipT) * 8]}
+                    rotation={[
+                      -tiltSign * TILT_ANGLE,
+                      0,
+                      -tiltSign * TILT_ANGLE,
+                    ]}
+                    renderOrder={2}
+                  >
+                    {/* Center raw text so translation/rotation act around its center */}
+                    <Center key={`${words[nextWord]}`} disableZ>
+                      <group
+                        matrixAutoUpdate={false}
+                        onUpdate={(g) =>
+                          // italic skew
+                          g.matrix.set(
+                            1,
+                            0.2,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                          )
+                        }
+                      >
+                        <Text3D
+                          font={"/fonts/geist_black.typeface.json"}
+                          size={size}
+                          height={0.08}
+                          bevelEnabled
+                          bevelThickness={0.02}
+                          bevelSize={0.02}
+                          bevelSegments={2}
+                          curveSegments={8}
+                        >
+                          {words[nextWord]}
+                          <MeshTransmissionMaterial
+                            attach="material-0"
+                            background={new THREE.Color().setHex(0x000000)}
+                            color={
+                              dark
+                                ? new THREE.Color().set("#f5f5f5")
+                                : new THREE.Color().set("#253D2C")
+                            }
+                            thickness={0.2}
+                            roughness={0.1}
+                            transmission={0.99}
+                            ior={1.25}
+                            chromaticAberration={0}
+                          />
+                          <meshStandardMaterial
+                            attach="material-1"
+                            color="#253D2C"
+                            roughness={0.85}
+                            metalness={0.05}
+                            envMapIntensity={0.6}
+                          />
+                          <Edges
+                            threshold={25}
+                            scale={1.001}
+                            color={dark ? "#f5f5f5" : "#253D2C"}
+                          />
+                        </Text3D>
+                      </group>
+                    </Center>
                   </group>
-                </Center>
+                )}
+
+                {/* Outgoing overlay: only created after incoming finishes; fades out */}
+                {outgoingWord && (
+                  <group
+                    scale={1.5}
+                    position={[0, 0, 0]}
+                    rotation={[outgoingTilt * TILT_ANGLE, 0, outgoingTilt * TILT_ANGLE]}
+                    renderOrder={1}
+                  >
+                    <Center key={`${outgoingWord}`} disableZ>
+                      <group
+                        matrixAutoUpdate={false}
+                        onUpdate={(g) =>
+                          g.matrix.set(
+                            1,
+                            0.2,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1,
+                          )
+                        }
+                      >
+                        <Text3D
+                          font={"/fonts/geist_black.typeface.json"}
+                          size={size}
+                          height={0.08}
+                          bevelEnabled
+                          bevelThickness={0.02}
+                          bevelSize={0.02}
+                          bevelSegments={2}
+                          curveSegments={8}
+                        >
+                          {outgoingWord}
+                          <MeshTransmissionMaterial
+                            attach="material-0"
+                            background={new THREE.Color().setHex(0x000000)}
+                            color={
+                              dark
+                                ? new THREE.Color().set("#f5f5f5")
+                                : new THREE.Color().set("#253D2C")
+                            }
+                            transparent
+                            opacity={outgoingOpacity}
+                            thickness={0.2}
+                            roughness={0.1}
+                            transmission={0.99}
+                            ior={1.25}
+                            chromaticAberration={0}
+                          />
+                          <meshStandardMaterial
+                            attach="material-1"
+                            color="#253D2C"
+                            transparent
+                            opacity={outgoingOpacity}
+                            roughness={0.85}
+                            metalness={0.05}
+                            envMapIntensity={0.6}
+                          />
+                          {outgoingOpacity > 0.05 && (
+                            <Edges
+                              threshold={25}
+                              scale={1.001}
+                              color={dark ? "#f5f5f5" : "#253D2C"}
+                            />
+                          )}
+                        </Text3D>
+                      </group>
+                    </Center>
+                  </group>
+                )}
               </group>
             )}
 
@@ -283,7 +503,7 @@ function MaskedScene() {
               position={[
                 0,
                 startY -
-                  (finished ? baseWords.length : baseWords.length + 1) * gap,
+                  (finished ? baseLines.length : baseLines.length + 1) * gap,
                 0,
               ]}
             >
@@ -329,7 +549,11 @@ function MaskedScene() {
                     metalness={0.05}
                     envMapIntensity={0.6}
                   />
-                  <Edges threshold={25} scale={1.001} color={dark ? "#b6f2c8" : "#253D2C"} />
+                  <Edges
+                    threshold={25}
+                    scale={1.001}
+                    color={dark ? "#b6f2c8" : "#253D2C"}
+                  />
                 </Text3D>
               </Center>
             </group>
