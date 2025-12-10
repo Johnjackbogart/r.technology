@@ -130,7 +130,6 @@ function MaskedScene() {
   return (
     <group>
       <Blob points={100000} flopAmount={"0.1"} eggplantAmount={"0.0"} />
-
       <group position={[0, 0, 1.5]}>
         <Center>
           <group>
@@ -140,22 +139,32 @@ function MaskedScene() {
                   key={w}
                   font={"/fonts/geist_black.typeface.json"}
                   size={size}
-                  height={0.05}
+                  height={0.08}
                   bevelEnabled
-                  bevelThickness={0.01}
-                  bevelSize={0.01}
+                  bevelThickness={0.02}
+                  bevelSize={0.02}
+                  bevelSegments={2}
                   curveSegments={8}
                   position={[0, startY - i * gap, 0]}
                 >
                   {w}
                   <MeshTransmissionMaterial
-                    background={new THREE.Color().setHex(0xffffff)}
-                    color={new THREE.Color().setHex(0xffffff)}
-                    thickness={0.05}
-                    roughness={0.05}
-                    transmission={0.99}
-                    ior={0.9}
-                    chromaticAberration={0.9}
+                    attach="material-0"
+                    background={new THREE.Color().setHex(0x000000)}
+                    color={new THREE.Color().setHex(0xb6f2c8)}
+                    thickness={0.2}
+                    roughness={0.1}
+                    transmission={1}
+                    distortion={0}
+                    ior={1.25}
+                    chromaticAberration={0}
+                  />
+                  <meshStandardMaterial
+                    attach="material-1"
+                    color="#253D2C"
+                    roughness={0.85}
+                    metalness={0.05}
+                    envMapIntensity={0.6}
                   />
                 </Text3D>
               ))}
@@ -193,21 +202,30 @@ function MaskedScene() {
                   <Text3D
                     font={"/fonts/geist_black.typeface.json"}
                     size={size}
-                    height={0.05}
+                    height={0.08}
                     bevelEnabled
-                    bevelThickness={0.01}
-                    bevelSize={0.005}
+                    bevelThickness={0.02}
+                    bevelSize={0.02}
+                    bevelSegments={2}
                     curveSegments={8}
                   >
                     {currentWord}
                     <MeshTransmissionMaterial
-                      background={new THREE.Color().setHex(0xffffff)}
-                      color={new THREE.Color().setHex(0x2f6848)}
-                      thickness={0.15}
-                      roughness={0.25}
-                      transmission={0.1}
-                      ior={1.1}
-                      chromaticAberration={0.01}
+                      attach="material-0"
+                      background={new THREE.Color().setHex(0x000000)}
+                      color={new THREE.Color().setHex(0xb6f2c8)}
+                      thickness={0.2}
+                      roughness={0.1}
+                      transmission={0.99}
+                      ior={1.25}
+                      chromaticAberration={0}
+                    />
+                    <meshStandardMaterial
+                      attach="material-1"
+                      color="#253D2C"
+                      roughness={0.85}
+                      metalness={0.05}
+                      envMapIntensity={0.6}
                     />
                   </Text3D>
                 </group>
@@ -239,22 +257,31 @@ function MaskedScene() {
                   <Text3D
                     font={"/fonts/geist_black.typeface.json"}
                     size={size}
-                    height={0.05}
+                    height={0.08}
                     bevelEnabled
-                    bevelThickness={0.01}
-                    bevelSize={0.005}
+                    bevelThickness={0.02}
+                    bevelSize={0.02}
+                    bevelSegments={2}
                     curveSegments={8}
                   >
                     {upcomingWord}
 
                     <MeshTransmissionMaterial
-                      background={new THREE.Color().setHex(0xffffff)}
-                      color={new THREE.Color().setHex(0x2f6848)}
-                      thickness={0.15}
-                      roughness={0.25}
-                      transmission={1}
-                      ior={1.1}
-                      chromaticAberration={0.01}
+                      attach="material-0"
+                      background={new THREE.Color().setHex(0x000000)}
+                      color={new THREE.Color().setHex(0xb6f2c8)}
+                      thickness={0.2}
+                      roughness={0.1}
+                      transmission={0.99}
+                      ior={1.25}
+                      chromaticAberration={0}
+                    />
+                    <meshStandardMaterial
+                      attach="material-1"
+                      color="#253D2C"
+                      roughness={0.85}
+                      metalness={0.05}
+                      envMapIntensity={0.6}
                     />
                   </Text3D>
                 </group>
@@ -265,10 +292,11 @@ function MaskedScene() {
           <Text3D
             font={"/fonts/geist_black.typeface.json"}
             size={size}
-            height={0.05}
+            height={0.08}
             bevelEnabled
-            bevelThickness={0.01}
-            bevelSize={0.005}
+            bevelThickness={0.05}
+            bevelSize={0.02}
+            bevelSegments={2}
             curveSegments={8}
             position={[
               0,
@@ -278,13 +306,33 @@ function MaskedScene() {
             ]}
           >
             way
-            <meshStandardMaterial color="#ffffff" />
+            <MeshTransmissionMaterial
+              attach="material-0"
+              background={new THREE.Color().setHex(0x000000)}
+              color={new THREE.Color().setHex(0xb6f2c8)}
+              thickness={0.2}
+              roughness={0.1}
+              transmission={1}
+              ior={1.25}
+              chromaticAberration={0}
+            />
+            <meshStandardMaterial
+              attach="material-1"
+              color="#253D2C"
+              roughness={0.85}
+              metalness={0.05}
+              envMapIntensity={0.6}
+            />
           </Text3D>
         </Center>
       </group>
-
       <ambientLight intensity={10} />
       <pointLight intensity={10} position={[0, 0, 0]} />
+      <ambientLight intensity={0.3} />
+      <directionalLight position={[2, 4, 3]} intensity={1.2} />
+      <directionalLight position={[-3, 2, 2]} intensity={0.6} />
+      {/* Subtle rim/back light to make bevels pop */}
+      <directionalLight position={[0, 1, -6]} intensity={0.4} color="#b6f2c8" />
     </group>
   );
 }

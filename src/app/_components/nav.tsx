@@ -33,7 +33,7 @@ export const Nav = () => {
   return (
     <div
       className={
-        "w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-transparent"
+        "pointer-events-auto w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-transparent"
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
