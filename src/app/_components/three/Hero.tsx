@@ -126,28 +126,199 @@ function MaskedScene() {
   const baseWords = ["There", "has", "to", "be", "a"] as const;
   const totalLines = finished ? baseWords.length + 1 : baseWords.length + 2;
   const startY = ((totalLines - 1) / 2) * gap;
+  const double = [1, 0.99];
 
   return (
     <group>
       <Blob points={100000} flopAmount={"0.1"} eggplantAmount={"0.0"} />
-      <group position={[0, 0, 1.5]}>
-        <Center>
-          <group>
-            <Center>
+      {double.map((d) => (
+        <group key={d} scale={d}>
+          <group key={d} position={[0, 0, 1.5]}>
+            <group>
               {baseWords.map((w, i) => (
+                <group key={w} position={[0, startY - i * gap, 0]}>
+                  <Center disableY disableZ>
+                    <Text3D
+                      font={"/fonts/geist_black.typeface.json"}
+                      size={size}
+                      height={0.08}
+                      bevelEnabled
+                      bevelThickness={0.02}
+                      bevelSize={0.02}
+                      bevelSegments={2}
+                      curveSegments={8}
+                    >
+                      {w}
+                      <MeshTransmissionMaterial
+                        attach="material-0"
+                        background={new THREE.Color().setHex(0x000000)}
+                        color={new THREE.Color().setHex(0xb6f2c8)}
+                        thickness={0.2}
+                        roughness={0.1}
+                        transmission={1}
+                        distortion={0}
+                        ior={1.25}
+                        chromaticAberration={0}
+                      />
+                      <meshStandardMaterial
+                        attach="material-1"
+                        color="#253D2C"
+                        roughness={0.85}
+                        metalness={0.05}
+                        envMapIntensity={0.6}
+                      />
+                    </Text3D>
+                  </Center>
+                </group>
+              ))}
+            </group>
+
+            {!finished && (
+              <group position={[0, startY - baseWords.length * gap, 0]}>
+                <group ref={prismRef}>
+                  <group
+                    matrixAutoUpdate={false}
+                    onUpdate={(g) =>
+                      //italic
+                      g.matrix.set(
+                        1,
+                        0.2,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                      )
+                    }
+                    visible={!rolling || flipT < 0.5}
+                  >
+                    <group>
+                      <Center disableY disableZ>
+                        <Text3D
+                          font={"/fonts/geist_black.typeface.json"}
+                          size={size}
+                          height={0.08}
+                          bevelEnabled
+                          bevelThickness={0.02}
+                          bevelSize={0.02}
+                          bevelSegments={2}
+                          curveSegments={8}
+                        >
+                          {currentWord}
+                          <MeshTransmissionMaterial
+                            attach="material-0"
+                            background={new THREE.Color().setHex(0x000000)}
+                            color={new THREE.Color().setHex(0xb6f2c8)}
+                            thickness={0.2}
+                            roughness={0.1}
+                            transmission={0.99}
+                            ior={1.25}
+                            chromaticAberration={0}
+                          />
+                          <meshStandardMaterial
+                            attach="material-1"
+                            color="#253D2C"
+                            roughness={0.85}
+                            metalness={0.05}
+                            envMapIntensity={0.6}
+                          />
+                        </Text3D>
+                      </Center>
+                    </group>
+                  </group>
+                  <group
+                    rotation={[Math.PI / 2, 0, 0]}
+                    matrixAutoUpdate={false}
+                    onUpdate={(g) =>
+                      g.matrix.set(
+                        1,
+                        0.2,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1,
+                      )
+                    }
+                    visible={rolling && flipT >= 0.5}
+                  >
+                    <group>
+                      <Center disableY disableZ>
+                        <Text3D
+                          font={"/fonts/geist_black.typeface.json"}
+                          size={size}
+                          height={0.08}
+                          bevelEnabled
+                          bevelThickness={0.02}
+                          bevelSize={0.02}
+                          bevelSegments={2}
+                          curveSegments={8}
+                        >
+                          {upcomingWord}
+
+                          <MeshTransmissionMaterial
+                            attach="material-0"
+                            background={new THREE.Color().setHex(0x000000)}
+                            color={new THREE.Color().setHex(0xb6f2c8)}
+                            thickness={0.2}
+                            roughness={0.1}
+                            transmission={0.99}
+                            ior={1.25}
+                            chromaticAberration={0}
+                          />
+                          <meshStandardMaterial
+                            attach="material-1"
+                            color="#253D2C"
+                            roughness={0.85}
+                            metalness={0.05}
+                            envMapIntensity={0.6}
+                          />
+                        </Text3D>
+                      </Center>
+                    </group>
+                  </group>
+                </group>
+              </group>
+            )}
+
+            <group
+              position={[
+                0,
+                startY -
+                  (finished ? baseWords.length : baseWords.length + 1) * gap,
+                0,
+              ]}
+            >
+              <Center disableY disableZ>
                 <Text3D
-                  key={w}
                   font={"/fonts/geist_black.typeface.json"}
                   size={size}
                   height={0.08}
                   bevelEnabled
-                  bevelThickness={0.02}
+                  bevelThickness={0.05}
                   bevelSize={0.02}
                   bevelSegments={2}
                   curveSegments={8}
-                  position={[0, startY - i * gap, 0]}
                 >
-                  {w}
+                  way
                   <MeshTransmissionMaterial
                     attach="material-0"
                     background={new THREE.Color().setHex(0x000000)}
@@ -155,7 +326,6 @@ function MaskedScene() {
                     thickness={0.2}
                     roughness={0.1}
                     transmission={1}
-                    distortion={0}
                     ior={1.25}
                     chromaticAberration={0}
                   />
@@ -167,167 +337,11 @@ function MaskedScene() {
                     envMapIntensity={0.6}
                   />
                 </Text3D>
-              ))}
-            </Center>
-          </group>
-
-          {!finished && (
-            <group position={[0, startY - baseWords.length * gap, 0]}>
-              <group ref={prismRef}>
-                <group
-                  matrixAutoUpdate={false}
-                  onUpdate={(g) =>
-                    //italic
-                    g.matrix.set(
-                      1,
-                      0.2,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                    )
-                  }
-                  visible={!rolling || flipT < 0.5}
-                >
-                  <Text3D
-                    font={"/fonts/geist_black.typeface.json"}
-                    size={size}
-                    height={0.08}
-                    bevelEnabled
-                    bevelThickness={0.02}
-                    bevelSize={0.02}
-                    bevelSegments={2}
-                    curveSegments={8}
-                  >
-                    {currentWord}
-                    <MeshTransmissionMaterial
-                      attach="material-0"
-                      background={new THREE.Color().setHex(0x000000)}
-                      color={new THREE.Color().setHex(0xb6f2c8)}
-                      thickness={0.2}
-                      roughness={0.1}
-                      transmission={0.99}
-                      ior={1.25}
-                      chromaticAberration={0}
-                    />
-                    <meshStandardMaterial
-                      attach="material-1"
-                      color="#253D2C"
-                      roughness={0.85}
-                      metalness={0.05}
-                      envMapIntensity={0.6}
-                    />
-                  </Text3D>
-                </group>
-                <group
-                  rotation={[Math.PI / 2, 0, 0]}
-                  matrixAutoUpdate={false}
-                  onUpdate={(g) =>
-                    g.matrix.set(
-                      1,
-                      0.2,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                      0,
-                      0,
-                      0,
-                      0,
-                      1,
-                    )
-                  }
-                  visible={rolling && flipT >= 0.5}
-                >
-                  <Text3D
-                    font={"/fonts/geist_black.typeface.json"}
-                    size={size}
-                    height={0.08}
-                    bevelEnabled
-                    bevelThickness={0.02}
-                    bevelSize={0.02}
-                    bevelSegments={2}
-                    curveSegments={8}
-                  >
-                    {upcomingWord}
-
-                    <MeshTransmissionMaterial
-                      attach="material-0"
-                      background={new THREE.Color().setHex(0x000000)}
-                      color={new THREE.Color().setHex(0xb6f2c8)}
-                      thickness={0.2}
-                      roughness={0.1}
-                      transmission={0.99}
-                      ior={1.25}
-                      chromaticAberration={0}
-                    />
-                    <meshStandardMaterial
-                      attach="material-1"
-                      color="#253D2C"
-                      roughness={0.85}
-                      metalness={0.05}
-                      envMapIntensity={0.6}
-                    />
-                  </Text3D>
-                </group>
-              </group>
+              </Center>
             </group>
-          )}
-
-          <Text3D
-            font={"/fonts/geist_black.typeface.json"}
-            size={size}
-            height={0.08}
-            bevelEnabled
-            bevelThickness={0.05}
-            bevelSize={0.02}
-            bevelSegments={2}
-            curveSegments={8}
-            position={[
-              0,
-              startY -
-                (finished ? baseWords.length : baseWords.length + 1) * gap,
-              0,
-            ]}
-          >
-            way
-            <MeshTransmissionMaterial
-              attach="material-0"
-              background={new THREE.Color().setHex(0x000000)}
-              color={new THREE.Color().setHex(0xb6f2c8)}
-              thickness={0.2}
-              roughness={0.1}
-              transmission={1}
-              ior={1.25}
-              chromaticAberration={0}
-            />
-            <meshStandardMaterial
-              attach="material-1"
-              color="#253D2C"
-              roughness={0.85}
-              metalness={0.05}
-              envMapIntensity={0.6}
-            />
-          </Text3D>
-        </Center>
-      </group>
-      <ambientLight intensity={10} />
-      <pointLight intensity={10} position={[0, 0, 0]} />
+          </group>
+        </group>
+      ))}
       <ambientLight intensity={0.3} />
       <directionalLight position={[2, 4, 3]} intensity={1.2} />
       <directionalLight position={[-3, 2, 2]} intensity={0.6} />
