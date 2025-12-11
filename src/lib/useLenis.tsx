@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import Lenis from "@studio-freight/lenis";
 
 const LenisContext = createContext<Lenis | null>(null);
@@ -31,7 +37,10 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     // Handle initial hash navigation
     if (window.location.hash) {
       setTimeout(() => {
-        lenisInstance.scrollTo(window.location.hash, { immediate: false, duration: 1.5 });
+        lenisInstance.scrollTo(window.location.hash, {
+          immediate: false,
+          duration: 1.5,
+        });
       }, 100);
     }
 
@@ -41,9 +50,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <LenisContext.Provider value={lenis}>
-      {children}
-    </LenisContext.Provider>
+    <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>
   );
 }
 
