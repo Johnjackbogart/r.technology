@@ -97,13 +97,13 @@ export const Nav = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
+            <DropdownMenuItem onClick={() => persistTheme(setTheme, "light")}>
               Light
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
+            <DropdownMenuItem onClick={() => persistTheme(setTheme, "dark")}>
               Dark
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
+            <DropdownMenuItem onClick={() => persistTheme(setTheme, "system")}>
               System
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -114,3 +114,12 @@ export const Nav = () => {
 };
 
 export default Nav;
+
+function persistTheme(
+  setTheme: (value: string) => void,
+  value: "light" | "dark" | "system",
+) {
+  // Keep cookie and next-themes localStorage aligned so SSR and hydration agree.
+  document.cookie = `theme=${value}; path=/; max-age=31536000; samesite=lax`;
+  setTheme(value);
+}
