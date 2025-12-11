@@ -26,9 +26,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistMono.className}`}>
-      <body>
-        <div className="flex h-dvh flex-col">
+    <html lang="en" className={`${GeistMono.className} min-h-screen`}>
+      <body className="min-h-screen bg-fixed bg-gradient-to-b from-[#333] via-[#f5f5f5] to-[#999] dark:from-[#0b0b0b] dark:via-[#050505] dark:to-[#000]">
+        <div className="flex min-h-screen flex-col">
           <ThemeProvider attribute="class" defaultTheme="system">
             <TRPCReactProvider>{children}</TRPCReactProvider>
           </ThemeProvider>

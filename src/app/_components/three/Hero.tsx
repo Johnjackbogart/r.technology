@@ -1,7 +1,7 @@
 "use client";
 import * as THREE from "three";
-import { useRef, useEffect, useState, useMemo } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useRef, useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import {
   MeshTransmissionMaterial,
   Text3D,
@@ -9,35 +9,118 @@ import {
   Edges,
 } from "@react-three/drei";
 import isMobile from "ismobilejs";
-import Blob from "./Blob";
 import { useThemeToFill } from "&/theme";
 
-// Simple easing for a stronger "slam" feel
-function easeInCubic(t: number) {
-  return t * t * t;
+interface MaskedSceneProps {
+  scrollProgress?: number; // 0-1 progress through hero section
 }
 
-function MaskedScene() {
+function SoftEmbers({
+  active,
+  origin = [0, 0, 0],
+}: {
+  active: boolean;
+  origin?: [number, number, number];
+}) {
+  const pointsRef = useRef<THREE.Points>(null);
+  const materialRef = useRef<THREE.PointsMaterial>(null);
+  const startRef = useRef<number | null>(null);
+
+  const { basePositions, phases, speeds, colors, count } = useMemo(() => {
+    const count = 90;
+    const basePositions = new Float32Array(count * 3);
+    const phases = new Float32Array(count);
+    const speeds = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+    const palette = [new THREE.Color("#b6f2c8"), new THREE.Color("#ffffff")];
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      basePositions[idx] = (Math.random() - 0.5) * 0.4;
+      basePositions[idx + 1] = (Math.random() - 0.3) * 0.25;
+      basePositions[idx + 2] = (Math.random() - 0.5) * 0.35;
+      phases[i] = Math.random() * Math.PI * 2;
+      speeds[i] = 0.4 + Math.random() * 0.6;
+      const color = palette[i % palette.length];
+      colors[idx] = color.r;
+      colors[idx + 1] = color.g;
+      colors[idx + 2] = color.b;
+    }
+
+    return { basePositions, phases, speeds, colors, count };
+  }, []);
+
+  useEffect(() => {
+    if (!pointsRef.current) return;
+    const positionAttr = pointsRef.current.geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+    positionAttr.array.set(basePositions);
+    positionAttr.needsUpdate = true;
+    startRef.current = null;
+  }, [active, basePositions]);
+
+  useFrame((state) => {
+    if (!pointsRef.current || !materialRef.current) return;
+    if (!active) {
+      materialRef.current.opacity = 0;
+      return;
+    }
+
+    if (startRef.current === null) {
+      startRef.current = state.clock.getElapsedTime();
+    }
+
+    const elapsed = state.clock.getElapsedTime() - startRef.current;
+    const positionAttr = pointsRef.current.geometry.getAttribute(
+      "position",
+    ) as THREE.BufferAttribute;
+    const positions = positionAttr.array as Float32Array;
+
+    for (let i = 0; i < count; i++) {
+      const idx = i * 3;
+      const t = elapsed * speeds[i] + phases[i];
+      const drift = Math.sin(t) * 0.08;
+      positions[idx] = basePositions[idx] + Math.sin(t * 0.7) * 0.05;
+      positions[idx + 1] =
+        basePositions[idx + 1] + drift + elapsed * 0.08; // slow upward lift
+      positions[idx + 2] = basePositions[idx + 2] + Math.cos(t * 0.6) * 0.05;
+    }
+
+    positionAttr.needsUpdate = true;
+    // Fade in quickly, then fade out softly
+    const fadeIn = Math.min(1, elapsed / 0.6);
+    const fadeOut = Math.max(0, 1 - elapsed / 3);
+    materialRef.current.opacity = fadeIn * fadeOut * 0.6;
+    pointsRef.current.rotation.y += 0.05 * state.clock.getDelta();
+  });
+
+  return (
+    <points ref={pointsRef} position={origin}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          args={[basePositions, 3]}
+        />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        ref={materialRef}
+        size={0.06}
+        sizeAttenuation
+        vertexColors
+        transparent
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+function MaskedScene({ scrollProgress = 0 }: MaskedSceneProps = {}) {
   const theming = useThemeToFill();
   const dark = theming?.theme === "dark" ? true : false;
   const tk = useRef<THREE.Mesh>(null);
-  const { viewport } = useThree();
   const mobile = isMobile(window.navigator).any;
-  const [wordIndex, setWordIndex] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [rolling, setRolling] = useState(false);
-  const [flipT, setFlipT] = useState(1);
-  const [nextWord, setNextWord] = useState<number | null>(null);
-  const [tiltSign, setTiltSign] = useState<1 | -1>(1);
-  const [outgoingWord, setOutgoingWord] = useState<string | null>(null);
-  const [outgoingTilt, setOutgoingTilt] = useState<1 | -1>(1);
-  const [fading, setFading] = useState(false);
-  const [fadeT, setFadeT] = useState(0);
-  const [showDisplay, setShowDisplay] = useState(false); // hidden until first word animates in
-  const [introRolling, setIntroRolling] = useState(true); // drive initial animation for first word
-  const [introStarted, setIntroStarted] = useState(false); // delay before starting intro motion
-  const wordIndexRef = useRef(wordIndex);
-  const tiltSignRef = useRef<1 | -1>(tiltSign);
 
   const words = [
     "healthier",
@@ -55,7 +138,6 @@ function MaskedScene() {
     "leaner",
     "fairer",
     "stronger",
-    // Added
     "brighter",
     "clearer",
     "kinder",
@@ -88,185 +170,41 @@ function MaskedScene() {
     "humane",
   ];
 
-  // Shared flip duration (ms) for both scheduling and animation
-  const FLIP_MS = 700;
-  // Make the very first intro animation a bit slower than the rest
-  const INTRO_MS = 1000;
   const TILT_ANGLE = 0.1;
-  const FADE_MS = 150; // fade duration for outgoing word
+  const showAnimatedWords = scrollProgress < 0.999;
 
-  // Drive the word rotation with decreasing waits and trigger flip animation
-  // Start scheduling only after the intro animation completes
-  useEffect(() => {
-    if (finished || introRolling) return;
+  // Calculate current word and transition based on scroll progress
+  const { currentWordIndex, transitionProgress, tiltSign } = useMemo(() => {
+    // Map scroll progress (0-1) to word index
+    const totalWords = words.length;
+    const rawIndex = scrollProgress * totalWords;
+    const currentWordIndex = Math.floor(rawIndex);
+    const transitionProgress = rawIndex - currentWordIndex; // 0-1 within current word
 
-    const rollMs = FLIP_MS; // flip duration
-    // Faster progression to shortest waits
-    const startHold = 2500;
-    const endHold = 250;
-    const transitions = Math.max(0, words.length - 1);
+    // Clamp to valid range
+    const clampedIndex = Math.min(currentWordIndex, totalWords - 1);
 
-    // Build decreasing durations across transitions (geometric ramp)
-    // Ratio chosen so first = startHold and last = endHold
-    const durations = Array.from({ length: transitions }, (_, i) => {
-      if (transitions <= 1) return startHold; // single step edge case
-      const n = transitions - 1;
-      const r = Math.pow(endHold / startHold, 1 / n); // 0<r<1
-      const gamma = 1.8; // steeper front-loaded decay to reach fast times sooner
-      const t = i / n;
-      const iPrime = Math.pow(t, gamma) * n;
-      return Math.round(startHold * Math.pow(r, iPrime));
-    });
+    // Alternate tilt direction
+    const tiltSign = clampedIndex % 2 === 0 ? 1 : -1;
 
-    const timeouts: number[] = [];
-    let acc = 0;
-
-    durations.forEach((d, i) => {
-      acc += d;
-      const fadeLead = FADE_MS; // start fade right before incoming lands
-      const fadeStart = Math.max(0, acc + rollMs - fadeLead);
-
-      // Start fade-out just before the incoming finishes
-      const tFade = window.setTimeout(() => {
-        const prevIdx = Math.min(wordIndexRef.current, words.length - 1);
-        const prevTilt = tiltSignRef.current;
-        // Hide the settled display while we fade it out
-        setShowDisplay(false);
-        setOutgoingWord(words[prevIdx]);
-        setOutgoingTilt(prevTilt);
-        setFadeT(0);
-        setFading(true);
-      }, fadeStart);
-      timeouts.push(tFade);
-
-      // Begin the incoming translation
-      const t = window.setTimeout(() => {
-        // Prepare incoming animation: set progress to 0
-        setFlipT(0);
-        setNextWord(i + 1);
-        setRolling(true);
-        const done = window.setTimeout(() => {
-          // Swap to the new word and new tilt for the display layer
-          setWordIndex(i + 1);
-          setRolling(false);
-          setNextWord(null);
-          // Alternate tilt AFTER the animation completes
-          setTiltSign((s) => (s === 1 ? -1 : 1));
-          // Reveal the settled display again for the new word
-          setShowDisplay(true);
-        }, rollMs);
-        timeouts.push(done);
-      }, acc);
-      timeouts.push(t);
-    });
-
-    // After the final word is shown for a beat, finish
-    const finalHold = 500;
-    const finishTimeout = window.setTimeout(
-      () => setFinished(true),
-      acc + finalHold,
-    );
-    timeouts.push(finishTimeout);
-
-    return () => {
-      timeouts.forEach((id) => clearTimeout(id));
+    return {
+      currentWordIndex: clampedIndex,
+      transitionProgress,
+      tiltSign,
     };
-  }, [finished, words.length, introRolling]);
+  }, [scrollProgress, words.length]);
 
-  const currentWord = words[Math.min(wordIndex, words.length - 1)];
-  // Keep refs in sync so timeouts use the latest values
-  useEffect(() => {
-    wordIndexRef.current = wordIndex;
-  }, [wordIndex]);
-  useEffect(() => {
-    tiltSignRef.current = tiltSign;
-  }, [tiltSign]);
-  const outgoingOpacity = fading ? 1 - fadeT : 1;
+  const currentWord = words[currentWordIndex];
+  const nextWord =
+    currentWordIndex < words.length - 1 ? words[currentWordIndex + 1] : null;
 
-  // Fade-out driver once fading starts
-  useEffect(() => {
-    if (!fading) return;
-    const start = performance.now();
-    let raf = 0 as number;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / FADE_MS);
-      setFadeT(t);
-      if (t < 1) raf = requestAnimationFrame(tick);
-      else {
-        setFading(false);
-        setOutgoingWord(null);
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [fading]);
+  // Show incoming word when transition is > 50%
+  const showIncoming = transitionProgress > 0.5 && nextWord !== null;
+  const incomingProgress = showIncoming ? (transitionProgress - 0.5) * 2 : 0; // 0-1
 
-  // Intro animation for the first word: translate in from front
-  useEffect(() => {
-    if (!introRolling) return;
-    // Wait 3 seconds before starting the intro motion
-    let raf = 0 as number;
-    const delayMs = 3000;
-    setIntroStarted(false);
-    const to = window.setTimeout(() => {
-      setIntroStarted(true);
-      setFlipT(0);
-      const start = performance.now();
-      const dur = INTRO_MS;
-      const tick = (now: number) => {
-        const t = Math.min(1, (now - start) / dur);
-        const e = 1 - Math.pow(1 - t, 3); // easeOutCubic
-        setFlipT(e);
-        if (t < 1) raf = requestAnimationFrame(tick);
-        else {
-          setIntroRolling(false);
-          setShowDisplay(true);
-        }
-      };
-      raf = requestAnimationFrame(tick);
-    }, delayMs);
-    return () => {
-      clearTimeout(to);
-      cancelAnimationFrame(raf);
-    };
-  }, [introRolling]);
-
-  // Animate the word translating in from in front of the scene when rolling starts
-  useEffect(() => {
-    if (!rolling) return;
-    const start = performance.now();
-    const dur = FLIP_MS;
-    let raf = 0 as number;
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / dur);
-      // easeOutCubic
-      const e = 1 - Math.pow(1 - t, 3);
-      setFlipT(e);
-      if (t < 1) raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [rolling]);
-
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.innerHTML = `
-      .custom-selection::selection {
-        background: rgba(.1, .1, .1, .1);
-        color: transparent;
-      }
-      .custom-selection::-moz-selection {
-        background: rgba(.1, .1, .1, .1);
-        color: transparent;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Cleanup the style tag on component unmount
-    return () => {
-      document.head.removeChild(style);
-    };
-  });
+  // Fade out current word when transition starts
+  const currentWordOpacity =
+    transitionProgress < 0.8 ? 1 : 1 - (transitionProgress - 0.8) / 0.2;
 
   useFrame((state) => {
     if (!tk.current) return;
@@ -276,23 +214,33 @@ function MaskedScene() {
     tk.current.rotation.y = state.clock.elapsedTime / 2;
   });
 
-  const size = 0.8;
+  // Responsive text size - smaller on mobile to fit the screen
+  const size = mobile ? 0.4 : 0.8;
   const gap = size * 1;
+  // Offset to compensate for italic skew - proportional to text size
+  const centerOffset = mobile ? -0.05 : -0.1;
+  // Scale for animated words - match base size on mobile, larger on desktop
+  const animatedScale = mobile ? 1.0 : 1.5;
   // Lift incoming word slightly while it travels to avoid overlap with "way"
   const incomingLift = gap * 0.35;
   // Raise final resting position of animated word to clear "way"
-  const animatedLineOffsetY = gap * 0.5;
+  // Adjusted based on scale - larger words need more offset
+  const animatedLineOffsetY = gap * (mobile ? 1.0 : 0.5);
   const baseLines = ["There", "has to be a"] as const;
-  const totalLines = finished ? baseLines.length + 1 : baseLines.length + 2;
+  const totalLines = showAnimatedWords ? baseLines.length + 2 : baseLines.length + 1;
   const startY = ((totalLines - 1) / 2) * gap;
   const double = mobile ? [1] : [1];
 
+  // Incoming word animation: easeOutCubic
+  const incomingEased = 1 - Math.pow(1 - incomingProgress, 3);
+
+  // Apply opacity to all materials would be complex, so for now just render/don't render
+  // In the future, could iterate through materials and set opacity
   return (
     <group>
-      <Blob points={100000} flopAmount={"0.1"} eggplantAmount={"0.0"} />
       {double.map((d) => (
         <group key={d} scale={d}>
-          <group key={d} position={[0, 0, 1.5]}>
+          <group key={d} position={[mobile ? -0.3 : 0, 0, 1.5]}>
             <group>
               {baseLines.map((line, i) => (
                 <group key={line} position={[0, startY - i * gap, 0]}>
@@ -349,261 +297,180 @@ function MaskedScene() {
               ))}
             </group>
 
-            {!finished && (
-              <group
-                position={[
-                  0,
-                  startY - baseLines.length * gap + animatedLineOffsetY,
-                  0,
-                ]}
-              >
-                {/* Display layer: shows the current settled word at z=0 */}
-                {showDisplay && (
-                  <group
-                    scale={1.5}
-                    rotation={[tiltSign * TILT_ANGLE, 0, tiltSign * TILT_ANGLE]}
-                    renderOrder={0}
-                  >
-                    <Center key={`${currentWord}`} disableZ>
-                      <group
-                        matrixAutoUpdate={false}
-                        onUpdate={(g) =>
-                          g.matrix.set(
-                            1,
-                            0.2,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                          )
-                        }
+            <group
+              position={[
+                0,
+                startY - baseLines.length * gap + animatedLineOffsetY,
+                0,
+              ]}
+            >
+              {/* Current word with fade-out */}
+              {showAnimatedWords && currentWordOpacity > 0.01 && (
+                <group
+                  scale={animatedScale}
+                  rotation={[tiltSign * TILT_ANGLE, 0, tiltSign * TILT_ANGLE]}
+                  renderOrder={0}
+                  position={[centerOffset, 0, 0]}
+                >
+                  <Center key={`${currentWord}`} disableZ>
+                    <group
+                      matrixAutoUpdate={false}
+                      onUpdate={(g) =>
+                        g.matrix.set(
+                          1,
+                          0.2,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                        )
+                      }
+                    >
+                      <Text3D
+                        font={"/fonts/geist_black.typeface.json"}
+                        size={size}
+                        height={0.08}
+                        bevelEnabled
+                        bevelThickness={0.02}
+                        bevelSize={0.02}
+                        bevelSegments={2}
+                        curveSegments={8}
                       >
-                        <Text3D
-                          font={"/fonts/geist_black.typeface.json"}
-                          size={size}
-                          height={0.08}
-                          bevelEnabled
-                          bevelThickness={0.02}
-                          bevelSize={0.02}
-                          bevelSegments={2}
-                          curveSegments={8}
-                        >
-                          {currentWord}
-                          <MeshTransmissionMaterial
-                            attach="material-0"
-                            background={new THREE.Color().setHex(0x000000)}
-                            color={
-                              dark
-                                ? new THREE.Color().set("#f5f5f5")
-                                : new THREE.Color().set("#253D2C")
-                            }
-                            thickness={0.2}
-                            roughness={0.1}
-                            transmission={0.99}
-                            ior={1.25}
-                            chromaticAberration={0}
-                          />
-                          <meshStandardMaterial
-                            attach="material-1"
-                            color="#253D2C"
-                            roughness={0.85}
-                            metalness={0.05}
-                            envMapIntensity={0.6}
-                          />
-                          <Edges
-                            threshold={25}
-                            scale={1.001}
-                            color={dark ? "#f5f5f5" : "#253D2C"}
-                          />
-                        </Text3D>
-                      </group>
-                    </Center>
-                  </group>
-                )}
+                        {currentWord}
+                        <MeshTransmissionMaterial
+                          attach="material-0"
+                          background={new THREE.Color().setHex(0x000000)}
+                          color={
+                            dark
+                              ? new THREE.Color().set("#f5f5f5")
+                              : new THREE.Color().set("#253D2C")
+                          }
+                          thickness={0.2}
+                          roughness={0.1}
+                          transmission={0.99}
+                          ior={1.25}
+                          chromaticAberration={0}
+                          transparent
+                          opacity={currentWordOpacity}
+                        />
+                        <meshStandardMaterial
+                          attach="material-1"
+                          color="#253D2C"
+                          roughness={0.85}
+                          metalness={0.05}
+                          envMapIntensity={0.6}
+                          transparent
+                          opacity={currentWordOpacity}
+                        />
+                        <Edges
+                          threshold={25}
+                          scale={1.001}
+                          color={dark ? "#f5f5f5" : "#b6f2c8"}
+                        />
+                      </Text3D>
+                    </group>
+                  </Center>
+                </group>
+              )}
 
-                {/* Incoming layer: only render while animating to avoid duplicates */}
-                {((introRolling && introStarted) || (rolling && nextWord !== null)) && (
-                  <group
-                    scale={1.5}
-                    position={[0, incomingLift * (1 - flipT), (1 - flipT) * 8]}
-                    rotation={[
-                      (introRolling ? tiltSign : -tiltSign) * TILT_ANGLE,
-                      0,
-                      (introRolling ? tiltSign : -tiltSign) * TILT_ANGLE,
-                    ]}
-                    renderOrder={2}
-                  >
-                    {/* Center raw text so translation/rotation act around its center */}
-                    <Center key={`${introRolling ? currentWord : (nextWord !== null ? words[nextWord] : currentWord)}` } disableZ>
-                      <group
-                        matrixAutoUpdate={false}
-                        onUpdate={(g) =>
-                          // italic skew
-                          g.matrix.set(
-                            1,
-                            0.2,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                          )
-                        }
+              {/* Incoming word animation */}
+              {showAnimatedWords && showIncoming && nextWord && (
+                <group
+                  scale={animatedScale}
+                  position={[
+                    centerOffset,
+                    incomingLift * (1 - incomingEased),
+                    (1 - incomingEased) * 8,
+                  ]}
+                  rotation={[-tiltSign * TILT_ANGLE, 0, -tiltSign * TILT_ANGLE]}
+                  renderOrder={2}
+                >
+                  {/* Center raw text so translation/rotation act around its center */}
+                  <Center key={nextWord} disableZ>
+                    <group
+                      matrixAutoUpdate={false}
+                      onUpdate={(g) =>
+                        // italic skew
+                        g.matrix.set(
+                          1,
+                          0.2,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                          0,
+                          0,
+                          0,
+                          0,
+                          1,
+                        )
+                      }
+                    >
+                      <Text3D
+                        font={"/fonts/geist_black.typeface.json"}
+                        size={size}
+                        height={0.08}
+                        bevelEnabled
+                        bevelThickness={0.02}
+                        bevelSize={0.02}
+                        bevelSegments={2}
+                        curveSegments={8}
                       >
-                        <Text3D
-                          font={"/fonts/geist_black.typeface.json"}
-                          size={size}
-                          height={0.08}
-                          bevelEnabled
-                          bevelThickness={0.02}
-                          bevelSize={0.02}
-                          bevelSegments={2}
-                          curveSegments={8}
-                        >
-                          {introRolling ? currentWord : (nextWord !== null ? words[nextWord] : currentWord)}
-                          <MeshTransmissionMaterial
-                            attach="material-0"
-                            background={new THREE.Color().setHex(0x000000)}
-                            color={
-                              dark
-                                ? new THREE.Color().set("#f5f5f5")
-                                : new THREE.Color().set("#253D2C")
-                            }
-                            thickness={0.2}
-                            roughness={0.1}
-                            transmission={0.99}
-                            ior={1.25}
-                            chromaticAberration={0}
-                          />
-                          <meshStandardMaterial
-                            attach="material-1"
-                            color="#253D2C"
-                            roughness={0.85}
-                            metalness={0.05}
-                            envMapIntensity={0.6}
-                          />
-                          <Edges
-                            threshold={25}
-                            scale={1.001}
-                            color={dark ? "#f5f5f5" : "#253D2C"}
-                          />
-                        </Text3D>
-                      </group>
-                    </Center>
-                  </group>
-                )}
-
-                {/* Outgoing overlay: only created after incoming finishes; fades out */}
-                {outgoingWord && (
-                  <group
-                    scale={1.5}
-                    position={[0, 0, 0]}
-                    rotation={[
-                      outgoingTilt * TILT_ANGLE,
-                      0,
-                      outgoingTilt * TILT_ANGLE,
-                    ]}
-                    renderOrder={1}
-                  >
-                    <Center key={`${outgoingWord}`} disableZ>
-                      <group
-                        matrixAutoUpdate={false}
-                        onUpdate={(g) =>
-                          g.matrix.set(
-                            1,
-                            0.2,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                            0,
-                            0,
-                            0,
-                            0,
-                            1,
-                          )
-                        }
-                      >
-                        <Text3D
-                          font={"/fonts/geist_black.typeface.json"}
-                          size={size}
-                          height={0.08}
-                          bevelEnabled
-                          bevelThickness={0.02}
-                          bevelSize={0.02}
-                          bevelSegments={2}
-                          curveSegments={8}
-                        >
-                          {outgoingWord}
-                          <MeshTransmissionMaterial
-                            attach="material-0"
-                            background={new THREE.Color().setHex(0x000000)}
-                            color={
-                              dark
-                                ? new THREE.Color().set("#f5f5f5")
-                                : new THREE.Color().set("#253D2C")
-                            }
-                            transparent
-                            opacity={outgoingOpacity}
-                            thickness={0.2}
-                            roughness={0.1}
-                            transmission={0.99}
-                            ior={1.25}
-                            chromaticAberration={0}
-                          />
-                          <meshStandardMaterial
-                            attach="material-1"
-                            color="#253D2C"
-                            transparent
-                            opacity={outgoingOpacity}
-                            roughness={0.85}
-                            metalness={0.05}
-                            envMapIntensity={0.6}
-                          />
-                          {outgoingOpacity > 0.05 && (
-                            <Edges
-                              threshold={25}
-                              scale={1.001}
-                              color={dark ? "#f5f5f5" : "#253D2C"}
-                            />
-                          )}
-                        </Text3D>
-                      </group>
-                    </Center>
-                  </group>
-                )}
-              </group>
-            )}
+                        {nextWord}
+                        <MeshTransmissionMaterial
+                          attach="material-0"
+                          background={new THREE.Color().setHex(0x000000)}
+                          color={
+                            dark
+                              ? new THREE.Color().set("#f5f5f5")
+                              : new THREE.Color().set("#253D2C")
+                          }
+                          thickness={0.2}
+                          roughness={0.1}
+                          transmission={0.99}
+                          ior={1.25}
+                          chromaticAberration={0}
+                        />
+                        <meshStandardMaterial
+                          attach="material-1"
+                          color="#253D2C"
+                          roughness={0.85}
+                          metalness={0.05}
+                          envMapIntensity={0.6}
+                        />
+                        <Edges
+                          threshold={25}
+                          scale={1.001}
+                          color={dark ? "#f5f5f5" : "#b6f2c8"}
+                        />
+                      </Text3D>
+                    </group>
+                  </Center>
+                </group>
+              )}
+            </group>
 
             <group
               position={[
                 0,
-                startY -
-                  (finished ? baseLines.length : baseLines.length + 1) * gap,
+                showAnimatedWords
+                  ? startY - (baseLines.length + 1) * gap
+                  : startY - baseLines.length * gap,
                 0,
               ]}
             >
@@ -657,6 +524,10 @@ function MaskedScene() {
                 </Text3D>
               </Center>
             </group>
+            <SoftEmbers
+              active={!showAnimatedWords}
+              origin={[0, startY - baseLines.length * gap, 0]}
+            />
           </group>
         </group>
       ))}
@@ -678,4 +549,4 @@ function Hero() {
   );
 }
 
-export { Hero };
+export { Hero, MaskedScene };

@@ -7,14 +7,14 @@ import isMobile from "ismobilejs";
 
 interface BlobProps {
   points: number;
-  flopAmount?: string;
-  eggplantAmount?: string;
+  flopAmount?: number;
+  eggplantAmount?: number;
   speed?: number; // overall animation speed multiplier
 }
 export default function Blob({
   points,
-  flopAmount = "1.0",
-  eggplantAmount = "1.0",
+  flopAmount = 1.0,
+  eggplantAmount = 1.0,
   speed = 0.5,
 }: BlobProps) {
   const mesh = useRef<THREE.Points>(null!);
@@ -28,6 +28,8 @@ export default function Blob({
     uMouse: { value: new THREE.Vector3(0, 0, 1) },
     uResolution: { value: new THREE.Vector2(size.width, size.height) },
     uSpeed: { value: speed },
+    uFlopAmount: { value: flopAmount },
+    uEggplantAmount: { value: eggplantAmount },
   });
 
   const [positions, colors] = useMemo(() => {
@@ -63,6 +65,13 @@ export default function Blob({
     if (mesh.current) {
       uniforms.current.uTime.value = currentTime;
       uniforms.current.uSpeed.value = speed;
+
+      // Smoothly interpolate to new parameter values
+      const lerpSpeed = 0.1; // Adjust for smoothness (lower = smoother but slower)
+      uniforms.current.uFlopAmount.value +=
+        (flopAmount - uniforms.current.uFlopAmount.value) * lerpSpeed;
+      uniforms.current.uEggplantAmount.value +=
+        (eggplantAmount - uniforms.current.uEggplantAmount.value) * lerpSpeed;
 
       // Apply momentum to mouse movement
       const lerpFactor = 1 - Math.pow(0.001, deltaTime);
@@ -113,6 +122,8 @@ export default function Blob({
     uniform float uTime;
     uniform float uSpeed;
     uniform vec3 uMouse;
+    uniform float uFlopAmount;
+    uniform float uEggplantAmount;
     attribute vec3 color;
     varying vec3 vColor;
     varying float vDistance;
@@ -301,13 +312,13 @@ export default function Blob({
       
       // Apply wave animation
       pos = waveAnimation(pos, uTime * uSpeed);
-      
+
       //apply eggplant morph
-      pos = pos + ${eggplantAmount} * eggplantMorph(pos, uTime * uSpeed);
+      pos = pos + uEggplantAmount * eggplantMorph(pos, uTime * uSpeed);
 
       // Apply string squeeze morphing
       // you can modify this to add some weird like flopping
-      pos = stringSqueezemorph(pos, uTime * 1.7 * uSpeed - 1.0 * 40.0 * ${flopAmount});
+      pos = stringSqueezemorph(pos, uTime * 1.7 * uSpeed - 1.0 * 40.0 * uFlopAmount);
       
       // Spherical undulation
       float noiseScale = 0.5;
@@ -354,7 +365,7 @@ export default function Blob({
   `;
 
   return (
-    <points ref={mesh} position={[0, 0, -10]}>
+    <points ref={mesh} position={[0, 0, -20]}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
