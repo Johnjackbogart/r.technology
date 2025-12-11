@@ -41,7 +41,7 @@ function SoftEmbers({
       basePositions[idx + 2] = (Math.random() - 0.5) * 0.35;
       phases[i] = Math.random() * Math.PI * 2;
       speeds[i] = 0.4 + Math.random() * 0.6;
-      const color = palette[i % palette.length];
+      const color = palette[i % palette.length]!;
       colors[idx] = color.r;
       colors[idx + 1] = color.g;
       colors[idx + 2] = color.b;
@@ -79,12 +79,17 @@ function SoftEmbers({
 
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
-      const t = elapsed * speeds[i] + phases[i];
+      const speed = speeds[i] ?? 0;
+      const phase = phases[i] ?? 0;
+      const baseX = basePositions[idx] ?? 0;
+      const baseY = basePositions[idx + 1] ?? 0;
+      const baseZ = basePositions[idx + 2] ?? 0;
+
+      const t = elapsed * speed + phase;
       const drift = Math.sin(t) * 0.08;
-      positions[idx] = basePositions[idx] + Math.sin(t * 0.7) * 0.05;
-      positions[idx + 1] =
-        basePositions[idx + 1] + drift + elapsed * 0.08; // slow upward lift
-      positions[idx + 2] = basePositions[idx + 2] + Math.cos(t * 0.6) * 0.05;
+      positions[idx] = baseX + Math.sin(t * 0.7) * 0.05;
+      positions[idx + 1] = baseY + drift + elapsed * 0.08; // slow upward lift
+      positions[idx + 2] = baseZ + Math.cos(t * 0.6) * 0.05;
     }
 
     positionAttr.needsUpdate = true;
