@@ -24,7 +24,10 @@ export const Nav = () => {
   const lenis = useLenis();
   const { currentSection } = useScrollSection();
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    target: string,
+  ) => {
     e.preventDefault();
     if (lenis) {
       lenis.scrollTo(target, { duration: 1.2 });
@@ -42,7 +45,7 @@ export const Nav = () => {
   return (
     <div
       className={
-        "pointer-events-auto w-m z-50 flex h-14 items-center overflow-visible border-b border-border bg-transparent"
+        "w-m pointer-events-auto z-50 flex h-14 items-center overflow-visible border-b border-border bg-transparent"
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
@@ -52,13 +55,25 @@ export const Nav = () => {
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
         <div className="flex basis-2 gap-3 text-lg text-black dark:text-white">
-          <Link href="#team" className={linkClass("team")} onClick={(e) => handleNavClick(e, "#team")}>
+          <Link
+            href="#team"
+            className={linkClass("team")}
+            onClick={(e) => handleNavClick(e, "#team")}
+          >
             Team
           </Link>
-          <Link href="#thesis" className={linkClass("thesis")} onClick={(e) => handleNavClick(e, "#thesis")}>
-            Thesis
+          <Link
+            href="#about"
+            className={linkClass("about")}
+            onClick={(e) => handleNavClick(e, "#about")}
+          >
+            About
           </Link>
-          <Link href="#portfolio" className={linkClass("portfolio")} onClick={(e) => handleNavClick(e, "#portfolio")}>
+          <Link
+            href="#portfolio"
+            className={linkClass("portfolio")}
+            onClick={(e) => handleNavClick(e, "#portfolio")}
+          >
             Portolio
           </Link>
         </div>

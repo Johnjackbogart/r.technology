@@ -8,7 +8,7 @@ export default async function Home() {
   return (
     <HydrateClient>
       <LenisProvider>
-        <div className="relative min-h-screen bg-gradient-to-b from-[#333] via-[#fff] to-[#999] dark:from-[#333] dark:via-[#000] dark:to-[#000]">
+        <div className="relative min-h-screen">
           {/* Fixed background canvas - always visible */}
           <div className="fixed inset-0 z-0 h-screen w-screen">
             <Canvas />
@@ -22,7 +22,7 @@ export default async function Home() {
 
             <main className="pointer-events-none relative">
               {/* Hero Section - Extended to show all word animations */}
-              <section id="hero" className="pointer-events-none h-[200vh]" />
+              <section id="hero" className="pointer-events-none h-[500vh]" />
 
               {/* Team Section - content rendered in 3D scene */}
               <section
@@ -30,9 +30,9 @@ export default async function Home() {
                 className="pointer-events-none min-h-screen"
               />
 
-              {/* Thesis Section - content rendered in 3D scene */}
+              {/* About Section - content rendered in 3D scene */}
               <section
-                id="thesis"
+                id="about"
                 className="pointer-events-none min-h-screen"
               />
 

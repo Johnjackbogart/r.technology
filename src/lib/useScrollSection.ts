@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export type SectionName = "hero" | "team" | "thesis" | "portfolio";
+export type SectionName = "hero" | "team" | "about" | "portfolio";
 
 export interface ScrollSectionState {
   currentSection: SectionName;
@@ -20,7 +20,7 @@ export function useScrollSection(): ScrollSectionState {
   const lastHashRef = useRef<string>("");
 
   useEffect(() => {
-    const sections = ["hero", "team", "thesis", "portfolio"];
+    const sections = ["hero", "team", "about", "portfolio"];
     const observerOptions = {
       root: null,
       rootMargin: "0px",

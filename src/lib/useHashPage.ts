@@ -2,12 +2,12 @@
 "use client";
 import { useMemo, useSyncExternalStore } from "react";
 
-export type Page = "Hero" | "Team" | "Thesis" | "Portfolio";
+export type Page = "Hero" | "Team" | "About" | "Portfolio";
 
 const HASH_TO_PAGE: Record<string, Page> = {
   "#hero": "Hero",
   "#team": "Team",
-  "#thesis": "Thesis",
+  "#about": "About",
   "#portfolio": "Portfolio",
 };
 
