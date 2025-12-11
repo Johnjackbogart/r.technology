@@ -15,17 +15,26 @@ import { Github } from "^/Github";
 import R from "^/R";
 import { useThemeToFill } from "&/theme";
 import pkg from "!/package.json";
-import { useHashPage } from "@/lib/useHashPage";
+import { useLenis } from "@/lib/useLenis";
+import { useScrollSection } from "@/lib/useScrollSection";
 
 export const Nav = () => {
   const { setTheme } = useTheme();
   const theming = useThemeToFill();
-  const current = useHashPage("Hero");
+  const lenis = useLenis();
+  const { currentSection } = useScrollSection();
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    e.preventDefault();
+    if (lenis) {
+      lenis.scrollTo(target, { duration: 1.2 });
+    }
+  };
 
   const linkClass = (name: string) =>
     clsx(
-      "transition-colors",
-      current.toLowerCase() === name
+      "transition-colors cursor-pointer",
+      currentSection === name
         ? "font-semibold !underline"
         : "opacity-80 hover:opacity-100",
     );
@@ -37,19 +46,19 @@ export const Nav = () => {
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
-        <Link href="/">
+        <Link href="/" onClick={(e) => handleNavClick(e, "#hero")}>
           <R theming={theming} />
         </Link>
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
         <div className="flex basis-2 gap-3 text-lg text-black dark:text-white">
-          <Link href="#team" className={linkClass("team")}>
+          <Link href="#team" className={linkClass("team")} onClick={(e) => handleNavClick(e, "#team")}>
             Team
           </Link>
-          <Link href="#thesis" className={linkClass("thesis")}>
+          <Link href="#thesis" className={linkClass("thesis")} onClick={(e) => handleNavClick(e, "#thesis")}>
             Thesis
           </Link>
-          <Link href="#portfolio" className={linkClass("portfolio")}>
+          <Link href="#portfolio" className={linkClass("portfolio")} onClick={(e) => handleNavClick(e, "#portfolio")}>
             Portolio
           </Link>
         </div>
