@@ -54,7 +54,7 @@ export default function Blob({
     }
 
     return [new Float32Array(positions), new Float32Array(colors)];
-  }, []);
+  }, [points]);
 
   useFrame((state) => {
     const { clock } = state;

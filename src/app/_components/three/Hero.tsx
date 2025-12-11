@@ -11,7 +11,7 @@ import {
 import isMobile from "ismobilejs";
 import { useThemeToFill } from "&/theme";
 
-interface MaskedSceneProps {
+interface HeroTextProps {
   scrollProgress?: number; // 0-1 progress through hero section
 }
 
@@ -121,7 +121,7 @@ function SoftEmbers({
   );
 }
 
-function MaskedScene({ scrollProgress = 0 }: MaskedSceneProps = {}) {
+function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
   const theming = useThemeToFill();
   const dark = theming?.theme === "dark" ? true : false;
   const tk = useRef<THREE.Mesh>(null);
@@ -232,7 +232,9 @@ function MaskedScene({ scrollProgress = 0 }: MaskedSceneProps = {}) {
   // Adjusted based on scale - larger words need more offset
   const animatedLineOffsetY = gap * (mobile ? 1.0 : 0.5);
   const baseLines = ["There", "has to be a"] as const;
-  const totalLines = showAnimatedWords ? baseLines.length + 2 : baseLines.length + 1;
+  const totalLines = showAnimatedWords
+    ? baseLines.length + 2
+    : baseLines.length + 1;
   const startY = ((totalLines - 1) / 2) * gap;
   const double = mobile ? [1] : [1];
 
@@ -548,10 +550,10 @@ function MaskedScene({ scrollProgress = 0 }: MaskedSceneProps = {}) {
 function Hero() {
   return (
     <>
-      <MaskedScene />
+      <HeroText />
       <spotLight position={[0, 0, 0]} penumbra={1} castShadow angle={0.2} />
     </>
   );
 }
 
-export { Hero, MaskedScene };
+export { Hero, HeroText };

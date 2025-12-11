@@ -6,7 +6,7 @@ import Blob from "./Blob";
 import { useScrollSection, SectionName } from "@/lib/useScrollSection";
 
 // Import MaskedScene from Hero (without the Blob and with opacity support)
-import { MaskedScene } from "./Hero";
+import { HeroText } from "./Hero";
 
 // Import content components
 import { TeamContent } from "../Team";
@@ -35,12 +35,10 @@ function lerp(a: number, b: number, t: number): number {
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 const FADE_IN_START = 0.88;
 const FADE_IN_END = 0.98;
-const FADE_OUT_START = 0.02;
-const FADE_OUT_END = 0.2;
 // Team fades handled only within the team section itself
 
 export default function ScrollResponsiveScene() {
-  const { currentSection, progress, scrollY } = useScrollSection();
+  const { currentSection, progress } = useScrollSection();
 
   // Calculate interpolated Blob parameters
   const blobParams = useMemo(() => {
@@ -177,7 +175,7 @@ export default function ScrollResponsiveScene() {
       {/* Hero 3D Text with fade-out and scroll offset */}
       {heroOpacity > 0.01 && (
         <group position={[0, heroYOffset, heroZOffset]}>
-          <MaskedScene scrollProgress={heroWordProgress} />
+          <HeroText scrollProgress={heroWordProgress} />
         </group>
       )}
 

@@ -10,7 +10,8 @@ export function PortfolioContent() {
             </h2>
             <div className="text-center text-foreground">
               <p className="text-lg">
-                Coming soon! We're excited to share what we're working on
+                Coming soon! We&apos;re excited to share what we&apos;re working
+                on
               </p>
             </div>
           </div>
