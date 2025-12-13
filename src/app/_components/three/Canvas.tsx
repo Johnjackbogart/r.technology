@@ -72,7 +72,7 @@ function ThreeCanvas() {
     return () => cancelAnimationFrame(rafId);
   }, [adaptiveLevel, baseProfile.level]);
 
-  const mergedProfile = useMemo(() => {
+  const mergedProfile = useMemo<ReturnType<typeof usePerformanceProfile>>(() => {
     const effectiveLevel =
       manualOverride ??
       (baseProfile.level === "low" ? "low" : adaptiveLevel ?? baseProfile.level);
@@ -81,7 +81,7 @@ function ThreeCanvas() {
       return {
         ...baseProfile,
         level: "low" as const,
-        dpr: [1, 1],
+        dpr: [1, 1] as [number, number],
         disableEffects: true,
         particleMultiplier: Math.min(baseProfile.particleMultiplier, 0.25),
       };
