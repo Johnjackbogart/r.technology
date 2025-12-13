@@ -31,12 +31,17 @@ export const Nav = () => {
     e.preventDefault();
     if (lenis) {
       lenis.scrollTo(target, { duration: 1.2 });
+      return;
     }
+
+    // Fallback to native scroll when Lenis is disabled on low-power devices.
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" });
   };
 
   const linkClass = (name: string) =>
     clsx(
-      "transition-colors cursor-pointer",
+      "transition-colors cursor-pointer rounded-md text-white dark:text-brand-lush focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white dark:focus-visible:ring-brand-glow p-1",
+
       currentSection === name
         ? "font-semibold !underline"
         : "opacity-80 hover:opacity-100",
@@ -49,7 +54,11 @@ export const Nav = () => {
       }
     >
       <div className={"h-full w-max gap-1 overflow-visible"}>
-        <Link href="/" onClick={(e) => handleNavClick(e, "#hero")}>
+        <Link
+          href="/"
+          onClick={(e) => handleNavClick(e, "#hero")}
+          className="p-.5 inline-flex items-center rounded-md ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white dark:focus-visible:ring-brand-glow"
+        >
           <R theming={theming} />
         </Link>
       </div>
@@ -82,16 +91,24 @@ export const Nav = () => {
             window.open(pkg.homepage, "_blank", "noopener noreferrer");
           }}
           variant={"ghost"}
-          className={"ml-auto flex items-center gap-1.5"}
+          className={
+            "ml-auto flex items-center gap-1.5 text-white dark:text-brand-deep"
+          }
         >
           <span>
-            <Github className={"size-4 text-black dark:text-white"} />
+            <Github className={"size-4 text-white dark:text-brand-mid"} />
           </span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="default" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 fill-black transition-all dark:-rotate-90 dark:scale-0" />
+            <Button
+              variant="default"
+              size="icon"
+              className={
+                "!border !border-white !bg-transparent hover:!bg-brand-glow/10 dark:!border-brand-glow dark:!bg-brand-mid dark:!text-black dark:hover:!bg-brand-glow/90"
+              }
+            >
+              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 bg-transparent fill-transparent transition-all hover:fill-white dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>

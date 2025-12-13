@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Html } from "@react-three/drei";
 import Blob from "./Blob";
 import { useScrollSection, SectionName } from "@/lib/useScrollSection";
+import { type PerformanceProfile } from "@/lib/usePerformanceProfile";
 
 // Import MaskedScene from Hero (without the Blob and with opacity support)
 import { HeroText } from "./Hero";
@@ -37,8 +38,15 @@ const FADE_IN_START = 0.88;
 const FADE_IN_END = 0.98;
 // Team fades handled only within the team section itself
 
-export default function ScrollResponsiveScene() {
+type ScrollResponsiveSceneProps = {
+  performanceProfile?: PerformanceProfile;
+};
+
+export default function ScrollResponsiveScene({
+  performanceProfile,
+}: ScrollResponsiveSceneProps) {
   const { currentSection, progress } = useScrollSection();
+  const performanceLevel = performanceProfile?.level ?? "standard";
 
   // Calculate interpolated Blob parameters
   const blobParams = useMemo(() => {
@@ -160,10 +168,11 @@ export default function ScrollResponsiveScene() {
     <group>
       {/* Blob with interpolated parameters - always visible */}
       <Blob
-        points={100000}
+        points={performanceLevel === "low" ? 25000 : 75000}
         flopAmount={blobParams.flop}
         eggplantAmount={blobParams.eggplant}
         speed={0.5}
+        performanceProfile={performanceProfile}
       />
 
       {/* Lighting for the scene */}

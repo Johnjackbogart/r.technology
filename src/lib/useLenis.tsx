@@ -8,13 +8,24 @@ import {
   type ReactNode,
 } from "react";
 import Lenis from "@studio-freight/lenis";
+import { usePerformanceProfile } from "./usePerformanceProfile";
 
 const LenisContext = createContext<Lenis | null>(null);
 
 export function LenisProvider({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
+  const { level: performanceLevel } = usePerformanceProfile();
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion || performanceLevel === "low") {
+      setLenis(null);
+      return;
+    }
+
     // Initialize Lenis
     const lenisInstance = new Lenis({
       duration: 1.2,
@@ -47,7 +58,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     return () => {
       lenisInstance.destroy();
     };
-  }, []);
+  }, [performanceLevel]);
 
   return (
     <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>

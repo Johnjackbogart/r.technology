@@ -55,6 +55,15 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			brand: {
+  				base: '#253D2C', // anchor green
+  				mid: '#2F6848', // lighter forest
+  				light: '#3A7F58', // brighter than mid
+  				lush: '#4B8F69', // soft lifted green
+  				deep: '#1B4D3E', // deep fern
+  				border: '#1f4733', // UI border/tone
+  				glow: '#b6f2c8' // mint highlight
   			}
   		}
   	}
