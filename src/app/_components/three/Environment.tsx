@@ -5,6 +5,7 @@ import { Environment as DreiEnv, Lightformer } from "@react-three/drei";
 type FancyEnvironmentProps = {
   blur?: number;
   intensity?: number;
+  performanceLevel?: "standard" | "low";
 };
 
 // Colors aligned with the blob palette + neutrals
@@ -19,9 +20,12 @@ const WHITE = "#FFFFFF";
 export function Environment({
   blur = 0.5,
   intensity = 1,
+  performanceLevel = "standard",
 }: FancyEnvironmentProps) {
+  const resolution = performanceLevel === "low" ? 64 : 256;
+
   return (
-    <DreiEnv resolution={256} blur={blur}>
+    <DreiEnv resolution={resolution} blur={blur}>
       {/* Large soft rectangles to set overall tone */}
       <Lightformer
         form="rect"

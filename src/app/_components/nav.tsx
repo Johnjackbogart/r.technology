@@ -31,7 +31,11 @@ export const Nav = () => {
     e.preventDefault();
     if (lenis) {
       lenis.scrollTo(target, { duration: 1.2 });
+      return;
     }
+
+    // Fallback to native scroll when Lenis is disabled on low-power devices.
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" });
   };
 
   const linkClass = (name: string) =>

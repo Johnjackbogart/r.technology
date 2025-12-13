@@ -4,24 +4,28 @@ import { useRef, useMemo, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import isMobile from "ismobilejs";
+import { type PerformanceProfile } from "@/lib/usePerformanceProfile";
 
 interface BlobProps {
   points: number;
   flopAmount?: number;
   eggplantAmount?: number;
   speed?: number; // overall animation speed multiplier
+  performanceProfile?: PerformanceProfile;
 }
 export default function Blob({
   points,
   flopAmount = 1.0,
   eggplantAmount = 1.0,
   speed = 0.5,
+  performanceProfile,
 }: BlobProps) {
   const mesh = useRef<THREE.Points>(null!);
   const mousePosition = useRef({ x: 0, y: 0 });
   const targetMousePosition = useRef({ x: 0, y: 0 });
   const lastUpdateTime = useRef(0);
   const { size } = useThree();
+  const performanceLevel = performanceProfile?.level ?? "standard";
 
   const uniforms = useRef({
     uTime: { value: 0 },
@@ -30,14 +34,20 @@ export default function Blob({
     uSpeed: { value: speed },
     uFlopAmount: { value: flopAmount },
     uEggplantAmount: { value: eggplantAmount },
+    uQuality: { value: performanceLevel === "low" ? 0 : 1 },
   });
 
   const [positions, colors] = useMemo(() => {
     const positions = [];
     const colors = [];
-    const particleCount = isMobile(window.navigator).any
-      ? points / 10
-      : points * 2.5;
+    const isMobileDevice = isMobile(window.navigator).any;
+    const profileMultiplier =
+      performanceProfile?.particleMultiplier ??
+      (performanceLevel === "low" ? 0.25 : 0.6);
+    const particleCount = Math.max(
+      6000,
+      Math.floor(points * profileMultiplier * (isMobileDevice ? 0.35 : 1)),
+    );
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {
@@ -54,7 +64,7 @@ export default function Blob({
     }
 
     return [new Float32Array(positions), new Float32Array(colors)];
-  }, [points]);
+  }, [points, performanceLevel, performanceProfile]);
 
   useFrame((state) => {
     const { clock } = state;
@@ -74,7 +84,10 @@ export default function Blob({
         (eggplantAmount - uniforms.current.uEggplantAmount.value) * lerpSpeed;
 
       // Apply momentum to mouse movement
-      const lerpFactor = 1 - Math.pow(0.001, deltaTime);
+      const lerpFactor =
+        performanceLevel === "low"
+          ? 1 - Math.pow(0.0005, deltaTime)
+          : 1 - Math.pow(0.001, deltaTime);
       mousePosition.current.x +=
         (targetMousePosition.current.x - mousePosition.current.x) * lerpFactor;
       mousePosition.current.y +=
@@ -94,7 +107,8 @@ export default function Blob({
       }
 
       // Apply rotation to the entire particle field
-      mesh.current.rotation.y += deltaTime * 0.1 * speed;
+      const rotationSpeed = performanceLevel === "low" ? 0.05 : 0.1;
+      mesh.current.rotation.y += deltaTime * rotationSpeed * speed;
     }
   });
 
@@ -102,6 +116,10 @@ export default function Blob({
   useEffect(() => {
     uniforms.current.uResolution.value.set(size.width, size.height);
   }, [size]);
+
+  useEffect(() => {
+    uniforms.current.uQuality.value = performanceLevel === "low" ? 0 : 1;
+  }, [performanceLevel]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -124,6 +142,7 @@ export default function Blob({
     uniform vec3 uMouse;
     uniform float uFlopAmount;
     uniform float uEggplantAmount;
+    uniform float uQuality;
     attribute vec3 color;
     varying vec3 vColor;
     varying float vDistance;
@@ -305,47 +324,68 @@ export default function Blob({
       return finalColor;
     }
 
+    // Cheap hash-based color for low quality branch (1 trig)
+    float hash13(vec3 p) {
+      return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
+    }
+
+    vec3 simpleColor(vec3 pos, float t) {
+      float h = hash13(pos * 0.25 + t * 0.05);
+      // Two-tone mix to avoid multiple noise samples
+      vec3 dark = vec3(0.12, 0.20, 0.15);
+      vec3 mid = vec3(0.20, 0.32, 0.24);
+      return mix(dark, mid, h);
+    }
+
     void main() {
       vec3 pos = position;
-      
+
       float t = uTime * 0.5 * uSpeed;
-      
-      // Apply wave animation
-      pos = waveAnimation(pos, uTime * uSpeed);
 
-      //apply eggplant morph
-      pos = pos + uEggplantAmount * eggplantMorph(pos, uTime * uSpeed);
+      bool lowQuality = uQuality < 0.5;
 
-      // Apply string squeeze morphing
-      // you can modify this to add some weird like flopping
-      pos = stringSqueezemorph(pos, uTime * 1.7 * uSpeed - 1.0 * 40.0 * uFlopAmount);
-      
-      // Spherical undulation
-      float noiseScale = 0.5;
-      float noiseAmplitude = 0.05;
-      float undulation = snoise(vec3(pos.x * noiseScale, pos.y * noiseScale, pos.z * noiseScale + t * 0.2)) * noiseAmplitude;
-      
-      pos += normalize(pos) * undulation;
+      if (lowQuality) {
+        // Lighter path: remove squeeze/twist and heavy noise
+        pos = waveAnimation(pos, uTime * uSpeed * 0.5);
+        // Reintroduce squeeze morph but with gentler timing to keep cost manageable
+        pos = stringSqueezemorph(pos, uTime * 1.0 * uSpeed - 1.0 * 10.0 * uFlopAmount);
+        pos += normalize(pos) * 0.02 * sin(t * 0.5);
 
-      // Mouse interaction with increased circular area, affecting the side facing the mouse
-      float interactionRadius = 0.8; // Adjust this value to change the size of the affected area
-      float dotProduct = dot(normalize(pos), uMouse);
+        float dotProduct = dot(normalize(pos), uMouse);
+        if (dotProduct > 0.9 && uTime > 5.0) {
+          pos += uMouse * 0.15 * (dotProduct - 0.9);
+        }
 
-      if (dotProduct > cos(interactionRadius) && uTime > 5.0) {
-        float mouseEffect = smoothstep(cos(interactionRadius), 1.0, dotProduct) * 2.5;
-        float mouseDisplacement = sin(dotProduct * 10.0 - uTime * 5.0) * mouseEffect;
-        pos += uMouse * mouseDisplacement * 0.5;
+        vColor = simpleColor(pos, t);
+        vDistance = length(pos) / 10.0;
+      } else {
+        // Full quality path
+        pos = waveAnimation(pos, uTime * uSpeed);
+        pos = pos + uEggplantAmount * eggplantMorph(pos, uTime * uSpeed);
+        pos = stringSqueezemorph(pos, uTime * 1.7 * uSpeed - 1.0 * 40.0 * uFlopAmount);
+
+        float noiseScale = 0.5;
+        float noiseAmplitude = 0.05;
+        float undulation = snoise(vec3(pos.x * noiseScale, pos.y * noiseScale, pos.z * noiseScale + t * 0.2)) * noiseAmplitude;
+
+        pos += normalize(pos) * undulation;
+
+        float interactionRadius = 0.8;
+        float dotProduct = dot(normalize(pos), uMouse);
+
+        if (dotProduct > cos(interactionRadius) && uTime > 5.0) {
+          float mouseEffect = smoothstep(cos(interactionRadius), 1.0, dotProduct) * 2.5;
+          float mouseDisplacement = sin(dotProduct * 10.0 - uTime * 5.0) * mouseEffect;
+          pos += uMouse * mouseDisplacement * 0.5;
+        }
+
+        vColor = tieDyeColor(pos, uTime * uSpeed);
+        vDistance = length(pos) / 10.0;
       }
-
-      // Apply tie-dye coloring
-      vColor = tieDyeColor(pos, uTime * uSpeed);
-
-      // Calculate distance for glow effect
-      vDistance = length(pos) / 10.0;
 
       vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
       gl_Position = projectionMatrix * mvPosition;
-      gl_PointSize = 4.0 / -mvPosition.z;
+      gl_PointSize = (lowQuality ? 3.0 : 4.0) / -mvPosition.z;
     }
   `;
 
@@ -367,14 +407,8 @@ export default function Blob({
   return (
     <points ref={mesh} position={[0, 0, -20]}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-        <bufferAttribute
-          attach="attributes-color"
-          args={[colors, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
       </bufferGeometry>
       <shaderMaterial
         vertexShader={vertexShader}
