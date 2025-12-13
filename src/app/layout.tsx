@@ -46,7 +46,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistMono.className} min-h-screen ${initialTheme === "dark" ? "dark" : ""}`}
+      className={`${GeistMono.className} min-h-screen ${initialTheme === "dark" ? "dark" : "light"}`}
       style={{ colorScheme: initialTheme === "dark" ? "dark" : "light" }}
     >
       <body className="min-h-screen bg-gradient-to-b from-[#333] via-[#f5f5f5] to-[#999] bg-fixed dark:from-[#0b0b0b] dark:via-[#050505] dark:to-[#000]">
