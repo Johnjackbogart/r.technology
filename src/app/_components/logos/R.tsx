@@ -9,6 +9,8 @@ interface headerProps extends SVGProps<SVGSVGElement> {
 
 export default function R({ theming }: headerProps) {
   if (!theming) return;
+  const strokeColor = "#fff";
+
   return (
     <svg
       width="50"
@@ -52,7 +54,12 @@ export default function R({ theming }: headerProps) {
           <stop offset="100" stopColor={`${theming.icon}`} />
         </linearGradient>
       </defs>
-      <g fill={"url(#outerg)"}>
+      <g
+        fill={"url(#outerg)"}
+        stroke={strokeColor}
+        strokeWidth={8}
+        strokeLinejoin="round"
+      >
         <path d="M 48.871896,28.46531 C 36.185471,38.350464 25.036783,50.88005 23.845005,87.115825 l 0.08475,265.407505 31.953605,0.19586 V 87.81804 c -0.09221,-1.10323 0.04955,-4.657766 0.04955,-5.784849 0,-21.893436 18.030605,-37.005698 39.924048,-37.005698 1.188387,0 6.271562,-0.03889 7.437852,-0.03889 l 45.00307,0 V 14.227752 L 95.188405,14.003741 C 76.753404,14.041731 63.641963,16.9566 48.871896,28.46531 Z" />
         <ellipse
           id="path910"
