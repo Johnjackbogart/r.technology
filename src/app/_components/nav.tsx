@@ -83,7 +83,7 @@ export const Nav = () => {
             className={linkClass("portfolio")}
             onClick={(e) => handleNavClick(e, "#portfolio")}
           >
-            Portolio
+            Portfolio
           </Link>
         </div>
         <Button
