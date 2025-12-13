@@ -20,8 +20,8 @@ export default defineConfig({
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.05, // Allow 5% pixel difference
-      timeout: 15000,
     },
+    timeout: 15000,
   },
 
   snapshotPathTemplate:

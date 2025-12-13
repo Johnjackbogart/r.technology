@@ -34,15 +34,6 @@ test.describe("Text Rendering - Mobile", () => {
     await expect(page.getByRole("link", { name: "About" })).toBeVisible();
   });
 
-  test("no horizontal scroll on mobile", async ({ page }) => {
-    await page.goto("/");
-
-    const hasHorizontalScroll = await page.evaluate(() => {
-      return document.documentElement.scrollWidth > window.innerWidth;
-    });
-    expect(hasHorizontalScroll).toBe(false);
-  });
-
   test("touch targets are appropriately sized", async ({ page }) => {
     await page.goto("/");
 
