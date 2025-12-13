@@ -24,13 +24,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "!/": path.resolve(__dirname, "./"),
-      "@/": path.resolve(__dirname, "./src/"),
-      "~/": path.resolve(__dirname, "./src/app/"),
-      "&/": path.resolve(__dirname, "./src/app/_components/"),
-      "#/": path.resolve(__dirname, "./src/app/_components/ui/"),
-      "^/": path.resolve(__dirname, "./src/app/_components/logos/"),
-      "+/": path.resolve(__dirname, "./src/server/api/"),
+      "!": path.resolve(__dirname, "./"),
+      "@": path.resolve(__dirname, "./src"),
+      "~": path.resolve(__dirname, "./src/app"),
+      "&": path.resolve(__dirname, "./src/app/_components"),
+      "#": path.resolve(__dirname, "./src/app/_components/ui"),
+      "^": path.resolve(__dirname, "./src/app/_components/logos"),
+      "+": path.resolve(__dirname, "./src/server/api"),
     },
   },
 });
