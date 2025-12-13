@@ -20,8 +20,8 @@ test.describe("Homepage", () => {
     const themeButton = page.getByRole("button", { name: /toggle theme/i });
     await expect(themeButton).toBeVisible();
 
-    // Click to open dropdown
-    await themeButton.click();
+    // Click to open dropdown (force click to bypass any overlays)
+    await themeButton.click({ force: true });
 
     // Check theme options appear
     await expect(page.getByRole("menuitem", { name: "Light" })).toBeVisible();

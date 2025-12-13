@@ -27,6 +27,12 @@ function SoftEmbers({
   const startRef = useRef<number | null>(null);
 
   const { basePositions, phases, speeds, colors, count } = useMemo(() => {
+    // Seeded random for deterministic results (pure function)
+    const seededRandom = (seed: number) => {
+      const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
     const count = 90;
     const basePositions = new Float32Array(count * 3);
     const phases = new Float32Array(count);
@@ -36,11 +42,11 @@ function SoftEmbers({
 
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
-      basePositions[idx] = (Math.random() - 0.5) * 0.4;
-      basePositions[idx + 1] = (Math.random() - 0.3) * 0.25;
-      basePositions[idx + 2] = (Math.random() - 0.5) * 0.35;
-      phases[i] = Math.random() * Math.PI * 2;
-      speeds[i] = 0.4 + Math.random() * 0.6;
+      basePositions[idx] = (seededRandom(i * 5) - 0.5) * 0.4;
+      basePositions[idx + 1] = (seededRandom(i * 5 + 1) - 0.3) * 0.25;
+      basePositions[idx + 2] = (seededRandom(i * 5 + 2) - 0.5) * 0.35;
+      phases[i] = seededRandom(i * 5 + 3) * Math.PI * 2;
+      speeds[i] = 0.4 + seededRandom(i * 5 + 4) * 0.6;
       const color = palette[i % palette.length]!;
       colors[idx] = color.r;
       colors[idx + 1] = color.g;
@@ -67,9 +73,7 @@ function SoftEmbers({
       return;
     }
 
-    if (startRef.current === null) {
-      startRef.current = state.clock.getElapsedTime();
-    }
+    startRef.current ??= state.clock.getElapsedTime();
 
     const elapsed = state.clock.getElapsedTime() - startRef.current;
     const positionAttr = pointsRef.current.geometry.getAttribute(

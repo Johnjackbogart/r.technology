@@ -40,7 +40,7 @@ export default async function RootLayout({
         : resolvedPref;
   const clientDefaultTheme =
     themeCookie === "dark" || themeCookie === "light" || themeCookie === "system"
-      ? (themeCookie as "light" | "dark" | "system")
+      ? themeCookie
       : "system";
 
   return (

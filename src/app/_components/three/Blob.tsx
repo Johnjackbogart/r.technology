@@ -27,17 +27,27 @@ export default function Blob({
   const { size } = useThree();
   const performanceLevel = performanceProfile?.level ?? "standard";
 
-  const uniforms = useRef({
-    uTime: { value: 0 },
-    uMouse: { value: new THREE.Vector3(0, 0, 1) },
-    uResolution: { value: new THREE.Vector2(size.width, size.height) },
-    uSpeed: { value: speed },
-    uFlopAmount: { value: flopAmount },
-    uEggplantAmount: { value: eggplantAmount },
-    uQuality: { value: performanceLevel === "low" ? 0 : 1 },
-  });
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uMouse: { value: new THREE.Vector3(0, 0, 1) },
+      uResolution: { value: new THREE.Vector2(size.width, size.height) },
+      uSpeed: { value: speed },
+      uFlopAmount: { value: flopAmount },
+      uEggplantAmount: { value: eggplantAmount },
+      uQuality: { value: performanceLevel === "low" ? 0 : 1 },
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- uniforms are stable, only inner values mutate
+    [],
+  );
 
   const [positions, colors] = useMemo(() => {
+    // Seeded random for deterministic results (pure function)
+    const seededRandom = (seed: number) => {
+      const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
     const positions = [];
     const colors = [];
     const isMobileDevice = isMobile(window.navigator).any;
@@ -51,8 +61,8 @@ export default function Blob({
     const radius = 10;
 
     for (let i = 0; i < particleCount; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = seededRandom(i) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i + particleCount) - 1);
       const x = radius * Math.sin(phi) * Math.cos(theta);
       const y = radius * Math.sin(phi) * Math.sin(theta);
       const z = radius * Math.cos(phi);
@@ -73,15 +83,15 @@ export default function Blob({
     lastUpdateTime.current = currentTime;
 
     if (mesh.current) {
-      uniforms.current.uTime.value = currentTime;
-      uniforms.current.uSpeed.value = speed;
+      uniforms.uTime.value = currentTime;
+      uniforms.uSpeed.value = speed;
 
       // Smoothly interpolate to new parameter values
       const lerpSpeed = 0.1; // Adjust for smoothness (lower = smoother but slower)
-      uniforms.current.uFlopAmount.value +=
-        (flopAmount - uniforms.current.uFlopAmount.value) * lerpSpeed;
-      uniforms.current.uEggplantAmount.value +=
-        (eggplantAmount - uniforms.current.uEggplantAmount.value) * lerpSpeed;
+      uniforms.uFlopAmount.value +=
+        (flopAmount - uniforms.uFlopAmount.value) * lerpSpeed;
+      uniforms.uEggplantAmount.value +=
+        (eggplantAmount - uniforms.uEggplantAmount.value) * lerpSpeed;
 
       // Apply momentum to mouse movement
       const lerpFactor =
@@ -103,7 +113,7 @@ export default function Blob({
           Math.sin(mouseY),
           mouseZ,
         ).normalize();
-        uniforms.current.uMouse.value = projectedMousePosition;
+        uniforms.uMouse.value = projectedMousePosition;
       }
 
       // Apply rotation to the entire particle field
@@ -114,12 +124,12 @@ export default function Blob({
 
   // Update uResolution when the window size changes
   useEffect(() => {
-    uniforms.current.uResolution.value.set(size.width, size.height);
-  }, [size]);
+    uniforms.uResolution.value.set(size.width, size.height);
+  }, [size, uniforms]);
 
   useEffect(() => {
-    uniforms.current.uQuality.value = performanceLevel === "low" ? 0 : 1;
-  }, [performanceLevel]);
+    uniforms.uQuality.value = performanceLevel === "low" ? 0 : 1;
+  }, [performanceLevel, uniforms]);
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
@@ -413,7 +423,7 @@ export default function Blob({
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        uniforms={uniforms.current}
+        uniforms={uniforms}
         transparent
         depthWrite={false}
       />

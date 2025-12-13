@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Html } from "@react-three/drei";
 import Blob from "./Blob";
-import { useScrollSection, SectionName } from "@/lib/useScrollSection";
+import { useScrollSection, type SectionName } from "@/lib/useScrollSection";
 import { type PerformanceProfile } from "@/lib/usePerformanceProfile";
 
 // Import MaskedScene from Hero (without the Blob and with opacity support)

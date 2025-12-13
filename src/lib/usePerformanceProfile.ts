@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type PerformanceLevel = "standard" | "low";
 
@@ -14,17 +14,62 @@ export type PerformanceProfile = {
   particleMultiplier: number;
 };
 
-const defaultDprMax =
-  typeof window !== "undefined"
-    ? Math.min(2, window.devicePixelRatio || 1.5)
-    : 1.5;
-
-const DEFAULT_PROFILE: PerformanceProfile = {
+const SERVER_DEFAULT_PROFILE: PerformanceProfile = {
   level: "standard",
-  dpr: [1, defaultDprMax],
+  dpr: [1, 1.5],
   disableEffects: false,
   particleMultiplier: 1,
 };
+
+// Cache for the snapshot to avoid infinite loops
+let cachedProfile: PerformanceProfile | null = null;
+let cachedKey: string | null = null;
+
+function computeProfile(): PerformanceProfile {
+  const nav = window.navigator as Navigator & { deviceMemory?: number };
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  const deviceMemory = nav.deviceMemory ?? 8;
+  const cores = nav.hardwareConcurrency ?? 8;
+  const isMobile = window.innerWidth <= 768;
+  const dpr = window.devicePixelRatio || 1.5;
+
+  // Create a cache key from the inputs
+  const key = `${prefersReducedMotion}-${isMobile}-${deviceMemory}-${cores}-${dpr}`;
+
+  // Return cached profile if inputs haven't changed
+  if (cachedKey === key && cachedProfile) {
+    return cachedProfile;
+  }
+
+  const looksLowPower =
+    prefersReducedMotion || isMobile || deviceMemory <= 4 || cores <= 4;
+
+  const defaultDprMax = Math.min(2, dpr);
+  const maxDpr = looksLowPower ? 1 : defaultDprMax;
+
+  cachedProfile = {
+    level: looksLowPower ? "low" : "standard",
+    dpr: [1, maxDpr],
+    disableEffects: prefersReducedMotion,
+    particleMultiplier: looksLowPower ? 0.25 : 0.6,
+  };
+  cachedKey = key;
+
+  return cachedProfile;
+}
+
+function subscribe(callback: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mediaQuery.addEventListener("change", callback);
+  window.addEventListener("resize", callback);
+
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+    window.removeEventListener("resize", callback);
+  };
+}
 
 /**
  * Derives a coarse performance profile to keep older/low-power devices responsive.
@@ -34,31 +79,9 @@ const DEFAULT_PROFILE: PerformanceProfile = {
  * - low device memory / core count
  */
 export function usePerformanceProfile() {
-  const [profile, setProfile] = useState<PerformanceProfile>(DEFAULT_PROFILE);
-
-  useEffect(() => {
-    const nav = window.navigator as Navigator & { deviceMemory?: number };
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const deviceMemory = nav.deviceMemory ?? 8; // gigabytes where available
-    const cores = nav.hardwareConcurrency ?? 8;
-    const isMobile = window.innerWidth <= 768;
-
-    const looksLowPower =
-      prefersReducedMotion || isMobile || deviceMemory <= 4 || cores <= 4;
-
-    const maxDpr = looksLowPower
-      ? 1
-      : Math.min(2, window.devicePixelRatio || defaultDprMax);
-
-    setProfile({
-      level: looksLowPower ? "low" : "standard",
-      dpr: [1, maxDpr],
-      disableEffects: prefersReducedMotion,
-      particleMultiplier: looksLowPower ? 0.25 : 0.6,
-    });
-  }, []);
-
-  return profile;
+  return useSyncExternalStore(
+    subscribe,
+    computeProfile,
+    () => SERVER_DEFAULT_PROFILE,
+  );
 }

@@ -17,10 +17,10 @@ function ThreeCanvas() {
   const fpsBelowThresholdFrames = useRef(0);
   const fpsAboveThresholdFrames = useRef(0);
 
+  // Reset frame counters when baseProfile changes to "low"
+  // Note: mergedProfile already computes effectiveLevel as "low" when baseProfile.level === "low"
   useEffect(() => {
-    // If heuristics say "low", force low and reset.
     if (baseProfile.level === "low") {
-      setAdaptiveLevel("low");
       fpsAboveThresholdFrames.current = 0;
       fpsBelowThresholdFrames.current = 0;
     }
