@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 
 //https://github.com/shadcn-ui/ui/issues/5706
@@ -44,16 +44,21 @@ export interface Shimmers {
 
 export type Theme = ThemeFill | undefined | null;
 
+const emptySubscribe = () => {
+  return () => {
+    /* noop cleanup */
+  };
+};
+
 export function useThemeToFill() {
   //theme may be undefined, so need to properly handle both here. The decision is to set the icon to be invisible
   const { resolvedTheme: nextTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  //i don't like this
   if (!mounted) return null;
   const isSystem = nextTheme === "system" ? true : false;
   const theme: Themes = nextTheme as Themes; //can return string | undefined, may  as well typecast

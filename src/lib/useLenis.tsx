@@ -22,8 +22,10 @@ export function LenisProvider({ children }: { children: ReactNode }) {
     ).matches;
 
     if (prefersReducedMotion || performanceLevel === "low") {
-      setLenis(null);
-      return;
+      // No Lenis needed - state stays/becomes null via cleanup
+      return () => {
+        setLenis(null);
+      };
     }
 
     // Initialize Lenis
@@ -35,6 +37,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
       touchMultiplier: 2,
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- external library initialization requires state sync
     setLenis(lenisInstance);
 
     // Animation frame loop
@@ -57,6 +60,7 @@ export function LenisProvider({ children }: { children: ReactNode }) {
 
     return () => {
       lenisInstance.destroy();
+      setLenis(null);
     };
   }, [performanceLevel]);
 
