@@ -134,11 +134,17 @@ function ThreeCanvas() {
       </Canvas>
       <button
         type="button"
-        className="pointer-events-auto absolute bottom-3 right-3 rounded-md bg-emerald-100/80 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur transition hover:bg-emerald-200"
+        aria-label="Toggle performance mode"
+        className="pointer-events-auto fixed z-[2000] rounded-md bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        style={{
+          right: "calc(0.75rem + env(safe-area-inset-right, 0px))",
+          bottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
+        }}
         onClick={() =>
-          setManualOverride((prev) =>
-            prev === "low" ? "high" : "low",
-          )
+          setManualOverride((prev) => (prev === "low" ? "high" : "low"))
+        }
+        onTouchStart={() =>
+          setManualOverride((prev) => (prev === "low" ? "high" : "low"))
         }
       >
         performance: {mergedProfile.level === "low" ? "low" : "high"} (
