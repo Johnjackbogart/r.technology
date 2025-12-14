@@ -47,6 +47,21 @@ export function AboutContent() {
             </ul>
           </div>
         </div>
+        <div className="flex-1 overflow-hidden rounded-sm border border-background/80 dark:border-background/30">
+          <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/80 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
+            <h2 className="text-2xl font-bold text-foreground underline">
+              More Thoughts
+            </h2>
+            <p className="mt-3 text-foreground/80">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </p>
+            <p className="mt-3 text-foreground/80">
+              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
