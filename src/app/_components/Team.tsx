@@ -1,6 +1,5 @@
 // Team.tsx - HTML content for team section
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo } from "react";
 
 const team = [
@@ -39,12 +38,14 @@ export function TeamContent() {
               {
                 "This is my dream! I'm excited to share what we're building with the world For more about me, check out "
               }
-              <Link
+              <a
                 href="https://www.johnjackbogart.com"
-                className="underline"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-primary"
               >
                 my website
-              </Link>
+              </a>
             </div>
           </div>
         </div>

@@ -189,59 +189,65 @@ export default function ScrollResponsiveScene({
       )}
 
       {/* Team Section - positioned in 3D space */}
-      <Html
-        position={[0, 0, -5]}
-        transform
-        occlude
-        style={{
-          width: "min(700px, 75vw)",
-          pointerEvents: getSectionVisibility("team") > 0.15 ? "auto" : "none",
-          opacity: getSectionVisibility("team"),
-          transform: `translate3d(0, ${30 * (1 - getSectionVisibility("team"))}px, 0)`,
-          transition: "opacity 200ms linear, transform 200ms linear",
-        }}
-      >
-        <div className="flex items-center justify-center">
-          <TeamContent />
-        </div>
-      </Html>
+      {getSectionVisibility("team") > 0 && (
+        <Html
+          position={[0, 0, -5]}
+          transform
+          occlude
+          style={{
+            width: "min(700px, 75vw)",
+            pointerEvents: getSectionVisibility("team") > 0.15 ? "auto" : "none",
+            opacity: getSectionVisibility("team"),
+            transform: `translate3d(0, ${30 * (1 - getSectionVisibility("team"))}px, 0)`,
+            transition: "opacity 200ms linear, transform 200ms linear",
+          }}
+        >
+          <div className="flex items-center justify-center">
+            <TeamContent />
+          </div>
+        </Html>
+      )}
 
       {/* About Section - positioned in 3D space */}
-      <Html
-        position={[0, 0, -5]}
-        transform
-        occlude
-        style={{
-          width: "min(1000px, 95vw)",
-          pointerEvents: getSectionVisibility("about") > 0.15 ? "auto" : "none",
-          opacity: getSectionVisibility("about"),
-          transform: `translate3d(0, ${30 * (1 - getSectionVisibility("about"))}px, 0)`,
-          transition: "opacity 200ms linear, transform 200ms linear",
-        }}
-      >
-        <div className="flex translate-y-16 items-center justify-center md:translate-y-0">
-          <AboutContent />
-        </div>
-      </Html>
+      {getSectionVisibility("about") > 0 && (
+        <Html
+          position={[0, 0, -5]}
+          transform
+          occlude
+          style={{
+            width: "min(1000px, 95vw)",
+            pointerEvents: getSectionVisibility("about") > 0.15 ? "auto" : "none",
+            opacity: getSectionVisibility("about"),
+            transform: `translate3d(0, ${30 * (1 - getSectionVisibility("about"))}px, 0)`,
+            transition: "opacity 200ms linear, transform 200ms linear",
+          }}
+        >
+          <div className="flex translate-y-16 items-center justify-center md:translate-y-0">
+            <AboutContent />
+          </div>
+        </Html>
+      )}
 
       {/* Portfolio Section - positioned in 3D space */}
-      <Html
-        position={[0, 0, -5]}
-        transform
-        occlude
-        style={{
-          width: "min(700px, 75vw)",
-          pointerEvents:
-            getSectionVisibility("portfolio") > 0.15 ? "auto" : "none",
-          opacity: getSectionVisibility("portfolio"),
-          transform: `translate3d(0, ${30 * (1 - getSectionVisibility("portfolio"))}px, 0)`,
-          transition: "opacity 200ms linear, transform 200ms linear",
-        }}
-      >
-        <div className="flex items-center justify-center">
-          <PortfolioContent />
-        </div>
-      </Html>
+      {getSectionVisibility("portfolio") > 0 && (
+        <Html
+          position={[0, 0, -5]}
+          transform
+          occlude
+          style={{
+            width: "min(700px, 75vw)",
+            pointerEvents:
+              getSectionVisibility("portfolio") > 0.15 ? "auto" : "none",
+            opacity: getSectionVisibility("portfolio"),
+            transform: `translate3d(0, ${30 * (1 - getSectionVisibility("portfolio"))}px, 0)`,
+            transition: "opacity 200ms linear, transform 200ms linear",
+          }}
+        >
+          <div className="flex items-center justify-center">
+            <PortfolioContent />
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
