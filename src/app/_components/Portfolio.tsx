@@ -8,11 +8,29 @@ export function PortfolioContent() {
             <h2 className="text-center text-3xl font-bold text-foreground">
               Portfolio
             </h2>
-            <div className="text-center text-foreground">
-              <p className="text-lg">
-                Coming soon! We&apos;re excited to share what we&apos;re working
-                on
-              </p>
+            <div className="flex flex-col gap-4 text-foreground">
+              <a
+                href="https://through.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-md border border-foreground/20 p-4 transition-colors hover:border-foreground/40 hover:bg-foreground/5"
+              >
+                <p className="text-lg font-semibold">through.tech</p>
+                <p className="text-sm text-foreground/70">
+                  need to keep the lights on
+                </p>
+              </a>
+              <a
+                href="https://braign.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-md border border-foreground/20 p-4 transition-colors hover:border-foreground/40 hover:bg-foreground/5"
+              >
+                <p className="text-lg font-semibold">braign.io</p>
+                <p className="text-sm text-foreground/70">
+                  tools for the technical marketer
+                </p>
+              </a>
             </div>
           </div>
         </div>
