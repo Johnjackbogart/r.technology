@@ -20,6 +20,27 @@ export const metadata: Metadata = {
       href: "/images/favicon-dark.ico",
     },
   ],
+  openGraph: {
+    title: "Hi :)",
+    description: "r.tech",
+    url: "https://r.technology",
+    siteName: "r.technology",
+    images: [
+      {
+        url: "/images/preview.png",
+        width: 1200,
+        height: 630,
+        alt: "r.technology preview",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Hi :)",
+    description: "r.tech",
+    images: ["/images/preview.png"],
+  },
 };
 
 export default async function RootLayout({
