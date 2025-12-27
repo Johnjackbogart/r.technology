@@ -78,7 +78,7 @@ export default async function RootLayout({
             storageKey="r-theme"
             enableSystem
           >
-            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <TRPCReactProvider><main>{children}</main></TRPCReactProvider>
           </ThemeProvider>
         </div>
       </body>

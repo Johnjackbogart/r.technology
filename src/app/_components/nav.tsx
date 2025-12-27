@@ -60,6 +60,7 @@ export const Nav = () => {
           className="p-.5 inline-flex items-center rounded-md ring-offset-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white dark:focus-visible:ring-brand-glow"
         >
           <R theming={theming} />
+          <span className="sr-only">Home</span>
         </Link>
       </div>
       <div className={"ml-auto flex items-center gap-1"}>
@@ -98,6 +99,7 @@ export const Nav = () => {
           <span>
             <Github className={"size-4 text-white dark:text-brand-mid"} />
           </span>
+          <span className="sr-only">View source on GitHub</span>
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

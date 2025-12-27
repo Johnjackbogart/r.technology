@@ -134,7 +134,6 @@ function ThreeCanvas() {
       </Canvas>
       <button
         type="button"
-        aria-label="Toggle performance mode"
         className="pointer-events-auto fixed z-[2000] rounded-md bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         style={{
           right: "calc(0.75rem + env(safe-area-inset-right, 0px))",
