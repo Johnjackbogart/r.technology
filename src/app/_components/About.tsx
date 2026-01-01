@@ -47,7 +47,7 @@ export function AboutContent() {
             </ul>
           </div>
         </div>
-        <div className="flex-1 overflow-hidden rounded-sm border border-background/80 dark:border-background/30">
+       /** <div className="flex-1 overflow-hidden rounded-sm border border-background/80 dark:border-background/30">
           <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/80 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
             <h2 className="text-2xl font-bold text-foreground underline">
               More Thoughts
@@ -62,6 +62,7 @@ export function AboutContent() {
             </p>
           </div>
         </div>
+**/
       </div>
     </div>
   );
