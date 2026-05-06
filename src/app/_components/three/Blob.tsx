@@ -297,7 +297,7 @@ export default function Blob({
       return pos;
     }
 
-    // Dark forest green palette anchored at #253D2C, desaturated (no moss tint)
+    // Dark gold palette anchored at #D4AF37.
     vec3 tieDyeColor(vec3 pos, float t) {
       float scale = 0.15;
       float speed = 0.2;
@@ -306,29 +306,28 @@ export default function Blob({
       float n2 = snoise(vec3(pos.y * scale, pos.z * scale, t * speed + 31.0)) * 0.5 + 0.5;
       float n3 = snoise(vec3(pos.z * scale, pos.x * scale, t * speed + 73.0)) * 0.5 + 0.5;
 
-      // Base forest color: #253D2C (RGB 37,61,44)
-      vec3 BASE = vec3(0.145, 0.239, 0.173);
-      // Darker variants derived from BASE (kept in green gamut)
-      vec3 G1 = BASE * 0.55; // very dark
-      vec3 G2 = BASE * 0.70; // dark
-      vec3 G3 = BASE * 0.85; // mid-dark
-      vec3 G4 = BASE;        // base
-      vec3 G5 = BASE;        // no moss tint
+      // Base gold color: #D4AF37 (RGB 212,175,55)
+      vec3 BASE = vec3(0.831, 0.686, 0.216);
+      // Darker variants derived from BASE.
+      vec3 G1 = BASE * 0.32; // very dark
+      vec3 G2 = BASE * 0.45; // dark
+      vec3 G3 = BASE * 0.62; // mid-dark
+      vec3 G4 = BASE * 0.78; // base shadow
 
-      // Mix greens with strong bias to darkest tones (G1/G2)
+      // Mix golds with strong bias to darkest tones (G1/G2)
       vec3 gA = mix(G1, G2, n1);              // darkest pair
       vec3 gB = mix(G3, G4, n2 * 0.5);        // limit mid contribution
-      vec3 gMid = gB;                          // remove lightest/moss contribution entirely
-      vec3 greens = mix(gA, gMid, 0.20);      // 80% weight to darkest greens
+      vec3 gMid = gB;
+      vec3 golds = mix(gA, gMid, 0.25);       // 75% weight to darkest golds
 
-      // Use greens only; keep it anchored to BASE
-      vec3 color = mix(greens, BASE, 0.30);
+      // Use gold only; keep it anchored to BASE
+      vec3 color = mix(golds, BASE, 0.25);
 
       // Muted brightness modulation for darker, earthy look
       float v = snoise(pos * 0.25 + t * 0.15) * 0.5 + 0.5; // 0..1
       float brightness = 0.26 + 0.10 * v; // 0.26..0.36
 
-      // No desaturation: keep full saturation of the dark greens
+      // Keep saturation in the gold range.
       vec3 finalColor = clamp(color * brightness, 0.0, 1.0);
 
       return finalColor;
@@ -342,8 +341,8 @@ export default function Blob({
     vec3 simpleColor(vec3 pos, float t) {
       float h = hash13(pos * 0.25 + t * 0.05);
       // Two-tone mix to avoid multiple noise samples
-      vec3 dark = vec3(0.12, 0.20, 0.15);
-      vec3 mid = vec3(0.20, 0.32, 0.24);
+      vec3 dark = vec3(0.33, 0.25, 0.04);
+      vec3 mid = vec3(0.58, 0.43, 0.08);
       return mix(dark, mid, h);
     }
 

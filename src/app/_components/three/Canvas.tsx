@@ -134,7 +134,7 @@ function ThreeCanvas() {
       </Canvas>
       <button
         type="button"
-        className="pointer-events-auto fixed z-[2000] rounded-md bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        className="pointer-events-auto fixed z-[2000] rounded-md bg-[#fff3bf]/90 px-3 py-1 text-xs font-semibold text-[#5f4300] shadow-sm backdrop-blur transition hover:bg-[#ffe08a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37]"
         style={{
           right: "calc(0.75rem + env(safe-area-inset-right, 0px))",
           bottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",

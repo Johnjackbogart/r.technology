@@ -20,7 +20,7 @@ export function TeamContent() {
           key={m.name}
           className="w-[240px] items-center overflow-hidden rounded-sm border border-background/90 shadow-sm dark:border-background/40"
         >
-          <div className="flex h-full flex-col items-center gap-3 rounded-[2px] border border-[#1f4733] bg-background/90 p-4 text-center dark:border-[#b6f2c8]">
+          <div className="flex h-full flex-col items-center gap-3 rounded-[2px] border border-brand-border bg-background/90 p-4 text-center dark:border-brand-glow">
             <Image
               src={m.img}
               alt={m.name}

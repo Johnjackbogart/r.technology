@@ -179,7 +179,7 @@ export default function ScrollResponsiveScene({
       <ambientLight intensity={0.3} />
       <directionalLight position={[2, 4, 3]} intensity={1.2} />
       <directionalLight position={[-3, 2, 2]} intensity={0.6} />
-      <directionalLight position={[0, 1, -6]} intensity={0.4} color="#b6f2c8" />
+      <directionalLight position={[0, 1, -6]} intensity={0.4} color="#ffe8a3" />
 
       {/* Hero 3D Text with fade-out and scroll offset */}
       {heroOpacity > 0.01 && (

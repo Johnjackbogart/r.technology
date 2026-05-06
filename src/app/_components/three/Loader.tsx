@@ -29,7 +29,7 @@ const styles = {
   },
   bar: {
     height: "100%",
-    background: "#4caf50",
+    background: "#d4af37",
     transition: "width 0.3s",
   },
   text: {
