@@ -38,7 +38,7 @@ function SoftEmbers({
     const phases = new Float32Array(count);
     const speeds = new Float32Array(count);
     const colors = new Float32Array(count * 3);
-    const palette = [new THREE.Color("#b6f2c8"), new THREE.Color("#ffffff")];
+    const palette = [new THREE.Color("#ffe8a3"), new THREE.Color("#ffffff")];
 
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
@@ -276,7 +276,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         }
                         color={
                           dark
-                            ? new THREE.Color().setHex(0xb6f2c8)
+                            ? new THREE.Color().setHex(0xffe8a3)
                             : new THREE.Color().setHex(0xf5f5f5)
                         }
                         thickness={0.2}
@@ -290,7 +290,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         attach="material-1"
                         color={
                           dark
-                            ? new THREE.Color().setHex(0x253d2c)
+                            ? new THREE.Color().setHex(0xb8860b)
                             : new THREE.Color().setHex(0xf5f5f5)
                         }
                         roughness={0.85}
@@ -300,7 +300,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                       <Edges
                         threshold={25}
                         scale={1.001}
-                        color={dark ? "#b6f2c8" : "#253D2C"}
+                        color={dark ? "#ffe8a3" : "#b8860b"}
                       />
                     </Text3D>
                   </Center>
@@ -364,7 +364,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                           color={
                             dark
                               ? new THREE.Color().set("#f5f5f5")
-                              : new THREE.Color().set("#253D2C")
+                              : new THREE.Color().set("#b8860b")
                           }
                           thickness={0.2}
                           roughness={0.1}
@@ -376,7 +376,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         />
                         <meshStandardMaterial
                           attach="material-1"
-                          color="#253D2C"
+                          color="#b8860b"
                           roughness={0.85}
                           metalness={0.05}
                           envMapIntensity={0.6}
@@ -386,7 +386,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         <Edges
                           threshold={25}
                           scale={1.001}
-                          color={dark ? "#f5f5f5" : "#b6f2c8"}
+                          color={dark ? "#f5f5f5" : "#ffe8a3"}
                         />
                       </Text3D>
                     </group>
@@ -449,7 +449,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                           color={
                             dark
                               ? new THREE.Color().set("#f5f5f5")
-                              : new THREE.Color().set("#253D2C")
+                              : new THREE.Color().set("#b8860b")
                           }
                           thickness={0.2}
                           roughness={0.1}
@@ -459,7 +459,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         />
                         <meshStandardMaterial
                           attach="material-1"
-                          color="#253D2C"
+                          color="#b8860b"
                           roughness={0.85}
                           metalness={0.05}
                           envMapIntensity={0.6}
@@ -467,7 +467,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                         <Edges
                           threshold={25}
                           scale={1.001}
-                          color={dark ? "#f5f5f5" : "#b6f2c8"}
+                          color={dark ? "#f5f5f5" : "#ffe8a3"}
                         />
                       </Text3D>
                     </group>
@@ -506,7 +506,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                     }
                     color={
                       dark
-                        ? new THREE.Color().setHex(0xb6f2c8)
+                        ? new THREE.Color().setHex(0xffe8a3)
                         : new THREE.Color().setHex(0xf5f5f5)
                     }
                     thickness={0.2}
@@ -520,7 +520,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                     attach="material-1"
                     color={
                       dark
-                        ? new THREE.Color().setHex(0x253d2c)
+                        ? new THREE.Color().setHex(0xb8860b)
                         : new THREE.Color().setHex(0xf5f5f5)
                     }
                     roughness={0.85}
@@ -530,7 +530,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
                   <Edges
                     threshold={25}
                     scale={1.001}
-                    color={dark ? "#b6f2c8" : "#253D2C"}
+                    color={dark ? "#ffe8a3" : "#b8860b"}
                   />
                 </Text3D>
               </Center>
@@ -546,7 +546,7 @@ function HeroText({ scrollProgress = 0 }: HeroTextProps = {}) {
       <directionalLight position={[2, 4, 3]} intensity={1.2} />
       <directionalLight position={[-3, 2, 2]} intensity={0.6} />
       {/* Subtle rim/back light to make bevels pop */}
-      <directionalLight position={[0, 1, -6]} intensity={0.4} color="#b6f2c8" />
+      <directionalLight position={[0, 1, -6]} intensity={0.4} color="#ffe8a3" />
     </group>
   );
 }

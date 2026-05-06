@@ -9,9 +9,9 @@ type FancyEnvironmentProps = {
 };
 
 // Colors aligned with the blob palette + neutrals
-const GREEN_BASE = "#253D2C"; // anchor
-const GREEN_MID = "#2F6848"; // lighter forest
-const GREEN_DEEP = "#1B4D3E"; // deep fern
+const GOLD_BASE = "#D4AF37"; // anchor
+const GOLD_MID = "#E0B84A"; // warm gold
+const GOLD_DEEP = "#B8860B"; // antique gold
 const NEUTRAL_DARK = "#222222";
 const NEUTRAL_MID = "#555555";
 const NEUTRAL_LIGHT = "#B5B5B5";
@@ -30,7 +30,7 @@ export function Environment({
       <Lightformer
         form="rect"
         intensity={1.2 * intensity}
-        color={GREEN_MID}
+        color={GOLD_MID}
         rotation={[0, Math.PI / 2, 0]}
         position={[8, 2, 0]}
         scale={[10, 5, 1]}
@@ -38,7 +38,7 @@ export function Environment({
       <Lightformer
         form="rect"
         intensity={0.9 * intensity}
-        color={GREEN_DEEP}
+        color={GOLD_DEEP}
         rotation={[0, -Math.PI / 2, 0]}
         position={[-8, -1, 0]}
         scale={[8, 4, 1]}
@@ -74,7 +74,7 @@ export function Environment({
         <Lightformer
           form="ring"
           intensity={0.7 * intensity}
-          color={GREEN_BASE}
+          color={GOLD_BASE}
           scale={1.6}
           position={[2, -1, -5]}
         />
@@ -91,7 +91,7 @@ export function Environment({
       <Lightformer
         form="rect"
         intensity={0.25 * intensity}
-        color={GREEN_BASE}
+        color={GOLD_BASE}
         position={[0, 6, 0]}
         scale={[20, 2, 1]}
       />

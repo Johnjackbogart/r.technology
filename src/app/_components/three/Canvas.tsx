@@ -14,55 +14,39 @@ function ThreeCanvas() {
   const [manualOverride, setManualOverride] = useState<"low" | "high" | null>(
     null,
   );
-  const fpsBelowThresholdFrames = useRef(0);
-  const fpsAboveThresholdFrames = useRef(0);
+  const lowFpsDurationMs = useRef(0);
 
-  // Reset frame counters when baseProfile changes to "low"
-  // Note: mergedProfile already computes effectiveLevel as "low" when baseProfile.level === "low"
   useEffect(() => {
-    if (baseProfile.level === "low") {
-      fpsAboveThresholdFrames.current = 0;
-      fpsBelowThresholdFrames.current = 0;
-    }
+    lowFpsDurationMs.current = 0;
   }, [baseProfile.level]);
 
-  // Lightweight FPS watcher using rAF; hysteresis keeps it from flapping.
+  // Lightweight FPS watcher. Auto mode only degrades after sustained low FPS;
+  // it does not promote itself back to high while the scene is running.
   useEffect(() => {
+    if (manualOverride !== null) {
+      lowFpsDurationMs.current = 0;
+      return;
+    }
+
     let rafId: number;
     let last = performance.now();
-    const maxBelow = 45; // ~0.75s at 60fps
-    const maxAbove = 120; // ~2s at 60fps
+    const lowFpsThresholdMs = 2500;
 
     const loop = (now: number) => {
       const delta = now - last || 16.7;
       last = now;
       const fps = 1000 / delta;
 
-      if (fps < 40) {
-        fpsBelowThresholdFrames.current += 1;
-        fpsAboveThresholdFrames.current = 0;
-      } else if (fps > 55) {
-        fpsAboveThresholdFrames.current += 1;
-        fpsBelowThresholdFrames.current = 0;
-      } else {
-        fpsAboveThresholdFrames.current = 0;
-        fpsBelowThresholdFrames.current = 0;
-      }
+      lowFpsDurationMs.current =
+        fps < 35 ? lowFpsDurationMs.current + delta : 0;
 
       if (
         baseProfile.level !== "low" &&
         adaptiveLevel !== "low" &&
-        fpsBelowThresholdFrames.current > maxBelow
+        lowFpsDurationMs.current >= lowFpsThresholdMs
       ) {
         setAdaptiveLevel("low");
-      }
-
-      if (
-        baseProfile.level === "standard" &&
-        adaptiveLevel === "low" &&
-        fpsAboveThresholdFrames.current > maxAbove
-      ) {
-        setAdaptiveLevel("standard");
+        lowFpsDurationMs.current = 0;
       }
 
       rafId = requestAnimationFrame(loop);
@@ -70,12 +54,16 @@ function ThreeCanvas() {
 
     rafId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafId);
-  }, [adaptiveLevel, baseProfile.level]);
+  }, [adaptiveLevel, baseProfile.level, manualOverride]);
 
-  const mergedProfile = useMemo<ReturnType<typeof usePerformanceProfile>>(() => {
+  const mergedProfile = useMemo<
+    ReturnType<typeof usePerformanceProfile>
+  >(() => {
     const effectiveLevel =
       manualOverride ??
-      (baseProfile.level === "low" ? "low" : adaptiveLevel ?? baseProfile.level);
+      (baseProfile.level === "low"
+        ? "low"
+        : (adaptiveLevel ?? baseProfile.level));
 
     if (effectiveLevel === "low") {
       return {
@@ -95,6 +83,7 @@ function ThreeCanvas() {
   }, [adaptiveLevel, baseProfile, manualOverride]);
 
   const isLowPower = mergedProfile.level === "low";
+  const manualModeLabel = manualOverride ?? "auto";
 
   return (
     <div className="relative h-full w-full">
@@ -107,14 +96,13 @@ function ThreeCanvas() {
         }}
         eventPrefix="client"
         camera={{ position: [0, 0, 10], fov: 100 }}
-        className="w-full h-full"
+        className="h-full w-full"
       >
         <PerformanceMonitor
           onDecline={() => {
-            if (baseProfile.level !== "low") setAdaptiveLevel("low");
-          }}
-          onIncline={() => {
-            if (baseProfile.level === "standard") setAdaptiveLevel("standard");
+            if (manualOverride === null && baseProfile.level !== "low") {
+              setAdaptiveLevel("low");
+            }
           }}
         />
         <Suspense fallback={<Loader />}>
@@ -134,20 +122,25 @@ function ThreeCanvas() {
       </Canvas>
       <button
         type="button"
-        className="pointer-events-auto fixed z-[2000] rounded-md bg-emerald-100/90 px-3 py-1 text-xs font-semibold text-emerald-900 shadow-sm backdrop-blur transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        className="pointer-events-auto fixed z-[2000] rounded-md bg-[#fff3bf]/90 px-3 py-1 text-xs font-semibold text-[#5f4300] shadow-sm backdrop-blur transition hover:bg-[#ffe08a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4af37]"
         style={{
           right: "calc(0.75rem + env(safe-area-inset-right, 0px))",
           bottom: "calc(0.75rem + env(safe-area-inset-bottom, 0px))",
         }}
+        aria-pressed={manualOverride !== null}
+        aria-label={`Performance override: ${manualModeLabel}; effective mode: ${
+          isLowPower ? "low" : "high"
+        }`}
+        title={`Effective performance: ${isLowPower ? "low" : "high"}`}
         onClick={() =>
-          setManualOverride((prev) => (prev === "low" ? "high" : "low"))
-        }
-        onTouchStart={() =>
-          setManualOverride((prev) => (prev === "low" ? "high" : "low"))
+          setManualOverride((prev) => {
+            if (prev === null) return "low";
+            if (prev === "low") return "high";
+            return null;
+          })
         }
       >
-        performance: {mergedProfile.level === "low" ? "low" : "high"} (
-        {manualOverride ? "manual" : "auto"})
+        performance: {manualModeLabel}
       </button>
     </div>
   );

@@ -4,7 +4,7 @@ export function AboutContent() {
     <div className="flex items-center justify-center">
       <div className="flex w-full max-w-5xl flex-col gap-4 md:flex-row">
         <div className="flex-1 overflow-hidden rounded-sm border border-background/90 dark:border-background/40">
-          <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/90 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
+          <div className="h-full rounded-[2px] border border-brand-border bg-background/90 p-6 text-left shadow-sm dark:border-brand-glow">
             <h2 className="text-2xl font-bold text-foreground underline">
               Thesis
             </h2>
@@ -19,7 +19,7 @@ export function AboutContent() {
           </div>
         </div>
         <div className="flex-1 overflow-hidden rounded-sm border border-background/85 dark:border-background/35">
-          <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/85 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
+          <div className="h-full rounded-[2px] border border-brand-border bg-background/85 p-6 text-left shadow-sm dark:border-brand-glow">
             <h2 className="text-2xl font-bold text-foreground underline">
               Mission
             </h2>
@@ -34,7 +34,7 @@ export function AboutContent() {
           </div>
         </div>
         <div className="flex-1 overflow-hidden rounded-sm border border-background/85 dark:border-background/35">
-          <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/85 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
+          <div className="h-full rounded-[2px] border border-brand-border bg-background/85 p-6 text-left shadow-sm dark:border-brand-glow">
             <h2 className="text-2xl font-bold text-foreground underline">
               Values
             </h2>
@@ -47,8 +47,8 @@ export function AboutContent() {
             </ul>
           </div>
         </div>
-        <div className="flex-1 overflow-hidden rounded-sm border border-background/80 dark:border-background/30">
-          <div className="h-full rounded-[2px] border border-[#1f4733] bg-background/80 p-6 text-left shadow-sm dark:border-[#b6f2c8]">
+        {/* <div className="flex-1 overflow-hidden rounded-sm border border-background/80 dark:border-background/30">
+          <div className="h-full rounded-[2px] border border-brand-border bg-background/80 p-6 text-left shadow-sm dark:border-brand-glow">
             <h2 className="text-2xl font-bold text-foreground underline">
               More Thoughts
             </h2>
@@ -61,7 +61,7 @@ export function AboutContent() {
               nisi ut aliquip ex ea commodo consequat.
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
