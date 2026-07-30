@@ -20,6 +20,8 @@ export function PortfolioContent() {
                   need to keep the lights on
                 </p>
               </a>
+              {
+                /**
               <a
                 href="https://braign.io"
                 target="_blank"
@@ -31,6 +33,8 @@ export function PortfolioContent() {
                   tools for the technical marketer
                 </p>
               </a>
+              **/
+              }
             </div>
           </div>
         </div>

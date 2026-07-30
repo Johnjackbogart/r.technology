@@ -42,5 +42,16 @@ export default tseslint.config(
         },
       ],
     },
-  }
+  },
+  {
+  files: [
+    "src/app/_components/three/Blob.tsx",
+    "src/app/_components/three/ParticleCloud.tsx",
+    "src/app/_components/three/**/*.shader.ts",
+  ],
+  rules: {
+    "react-hooks/immutability": "off",
+    "react-hooks/refs": "off",
+  },
+},
 );
