@@ -28,7 +28,7 @@ export default defineConfig({
     "{testDir}/__snapshots__/{testFilePath}/{arg}{ext}",
 
   webServer: {
-    command: "bun run dev",
+    command: "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
